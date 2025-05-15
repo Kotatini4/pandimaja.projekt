@@ -14,11 +14,13 @@ const toodeRoutes = require("./routes/toodeRoutes");
 const statusToodeRoutes = require("./routes/statusToodeRoutes");
 const lepingRoutes = require("./routes/lepingRoutes");
 const models = initModels(sequelize);
+const cors = require("cors");
 
 // Middleware
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/uploads", express.static("public/uploads"));
+app.use(cors());
 
 // Маршруты
 app.use("/api/leping", lepingRoutes);
