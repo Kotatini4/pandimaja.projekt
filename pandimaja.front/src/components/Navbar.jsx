@@ -36,6 +36,7 @@ export default function Navbar() {
 
     const navLinks = [
         { to: "/", label: "Главная" },
+        { to: "/contacts", label: "Контакты" },
         { to: "/klient", label: "Клиенты" },
         { to: "/toode", label: "Товары" },
         { to: "/leping", label: "Договоры" },
@@ -44,7 +45,11 @@ export default function Navbar() {
     return (
         <AppBar
             position="static"
-            sx={{ backgroundColor: "#bfa14a", color: "white" }}
+            sx={{
+                background: "linear-gradient(90deg, #2c225e 0%, #2c5c82 100%)",
+                color: "white",
+                boxShadow: 2,
+            }}
         >
             <Container>
                 <Toolbar>
