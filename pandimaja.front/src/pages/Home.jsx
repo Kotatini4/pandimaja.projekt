@@ -11,15 +11,20 @@ import {
     Button,
     Pagination,
     Stack,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from "@mui/material";
 
 export default function Home() {
     const [products, setProducts] = useState([]);
     const [page, setPage] = useState(1);
+    const [sortBy, setSortBy] = useState("");
     const perPage = 24;
 
     useEffect(() => {
-        api.get("/toode")
+        api.get("/toode/laos")
             .then((res) => {
                 const filtered = res.data.filter((p) => p.status_id === 1);
                 setProducts(filtered);
@@ -29,22 +34,57 @@ export default function Home() {
             });
     }, []);
 
-    // Пагинация: разбиваем товары по страницам
-    const totalPages = Math.ceil(products.length / perPage);
-    const visibleProducts = products.slice(
-        (page - 1) * perPage,
-        page * perPage
-    );
+    // Сортировка
+    let sorted = [...products];
+    if (sortBy === "name_asc") {
+        sorted.sort((a, b) => a.nimetus.localeCompare(b.nimetus));
+    } else if (sortBy === "name_desc") {
+        sorted.sort((a, b) => b.nimetus.localeCompare(a.nimetus));
+    } else if (sortBy === "price_asc") {
+        sorted.sort(
+            (a, b) =>
+                parseFloat(a.hind.replace(/[^0-9.]/g, "")) -
+                parseFloat(b.hind.replace(/[^0-9.]/g, ""))
+        );
+    } else if (sortBy === "price_desc") {
+        sorted.sort(
+            (a, b) =>
+                parseFloat(b.hind.replace(/[^0-9.]/g, "")) -
+                parseFloat(a.hind.replace(/[^0-9.]/g, ""))
+        );
+    }
+
+    const totalPages = Math.ceil(sorted.length / perPage);
+    const visible = sorted.slice((page - 1) * perPage, page * perPage);
 
     return (
         <Container sx={{ py: 4 }}>
-            <Typography variant="h4" gutterBottom>
-                Товары в продаже
-            </Typography>
+            <Stack direction="row" alignItems="center" mb={2}>
+                <Typography variant="h4">Товары в продаже</Typography>
 
-            <Grid container spacing={3}>
-                {visibleProducts.map((product) => (
-                    <Grid item key={product.toode_id} xs={12} sm={6} md={3}>
+                <FormControl size="small" sx={{ minWidth: 200, ml: "auto" }}>
+                    <InputLabel>Сортировать</InputLabel>
+                    <Select
+                        value={sortBy}
+                        label="Сортировать"
+                        onChange={(e) => setSortBy(e.target.value)}
+                    >
+                        <MenuItem value="">Без сортировки</MenuItem>
+                        <MenuItem value="name_asc">Название: A–Я</MenuItem>
+                        <MenuItem value="name_desc">Название: Я–A</MenuItem>
+                        <MenuItem value="price_asc">Цена: ↑</MenuItem>
+                        <MenuItem value="price_desc">Цена: ↓</MenuItem>
+                    </Select>
+                </FormControl>
+            </Stack>
+
+            <Grid container spacing={2}>
+                {visible.map((product) => (
+                    <Grid
+                        item
+                        key={product.toode_id}
+                        sx={{ flexBasis: "20%", maxWidth: "20%" }}
+                    >
                         <Card
                             sx={{
                                 height: "100%",
@@ -57,10 +97,7 @@ export default function Home() {
                                     component="img"
                                     image={`http://localhost:3000${product.image}`}
                                     alt={product.nimetus}
-                                    sx={{
-                                        height: 180,
-                                        objectFit: "cover",
-                                    }}
+                                    sx={{ height: 180, objectFit: "cover" }}
                                 />
                             )}
                             <CardContent sx={{ flexGrow: 1 }}>
@@ -78,14 +115,13 @@ export default function Home() {
                                 </Typography>
                             </CardContent>
                             <CardActions>
-                                <Button size="small">Подробнее</Button>
+                                <Button size="small">ПОДРОБНЕЕ</Button>
                             </CardActions>
                         </Card>
                     </Grid>
                 ))}
             </Grid>
 
-            {/* Пагинация */}
             {totalPages > 1 && (
                 <Stack spacing={2} mt={4} alignItems="center">
                     <Pagination
