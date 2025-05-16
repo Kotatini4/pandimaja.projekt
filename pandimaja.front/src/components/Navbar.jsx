@@ -39,7 +39,8 @@ export default function Navbar() {
         { to: "/contacts", label: "Контакты" },
         { to: "/klient", label: "Клиенты" },
         { to: "/toode", label: "Товары" },
-        { to: "/leping", label: "Договоры" },
+        { to: "/leping", label: "Договора" },
+        { to: "/worker", label: "Работники" },
     ];
 
     return (
