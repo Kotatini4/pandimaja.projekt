@@ -24,6 +24,8 @@ export default function Navbar() {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const [anchorEl, setAnchorEl] = useState(null);
+    const [tootajaMenuAnchor, setTootajaMenuAnchor] = useState(null);
+
     const open = Boolean(anchorEl);
 
     const handleLogout = () => {
@@ -34,6 +36,10 @@ export default function Navbar() {
     const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
 
+    const handleTootajaMenuOpen = (event) =>
+        setTootajaMenuAnchor(event.currentTarget);
+    const handleTootajaMenuClose = () => setTootajaMenuAnchor(null);
+
     const navLinks = [
         { to: "/", label: "Главная" },
         { to: "/contacts", label: "Контакты" },
@@ -42,7 +48,6 @@ export default function Navbar() {
                   { to: "/klient", label: "Клиенты" },
                   { to: "/toode", label: "Товары" },
                   { to: "/leping", label: "Договора" },
-                  { to: "/tootaja", label: "Работники" },
               ]
             : []),
     ];
@@ -89,10 +94,42 @@ export default function Navbar() {
                                         {link.label}
                                     </MenuItem>
                                 ))}
+                                {user?.roleId === 1 && (
+                                    <>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/tootaja"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Список работников
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/tootaja/create"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Добавить
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/tootaja/edit"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Редактировать
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/tootaja/users"
+                                            onClick={handleMenuClose}
+                                        >
+                                            ID / Kood / Пароль
+                                        </MenuItem>
+                                    </>
+                                )}
                                 {user ? (
                                     <>
                                         <MenuItem disabled>
-                                            {user.kood}
+                                            {user.name}
                                         </MenuItem>
                                         <MenuItem
                                             onClick={() => {
@@ -128,6 +165,48 @@ export default function Navbar() {
                                             {link.label}
                                         </Button>
                                     ))}
+                                    {user?.roleId === 1 && (
+                                        <Box>
+                                            <Button
+                                                color="inherit"
+                                                onMouseEnter={
+                                                    handleTootajaMenuOpen
+                                                }
+                                            >
+                                                Работники
+                                            </Button>
+                                            <Menu
+                                                anchorEl={tootajaMenuAnchor}
+                                                open={Boolean(
+                                                    tootajaMenuAnchor
+                                                )}
+                                                onClose={handleTootajaMenuClose}
+                                                MenuListProps={{
+                                                    onMouseLeave:
+                                                        handleTootajaMenuClose,
+                                                }}
+                                            >
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/tootaja"
+                                                    onClick={
+                                                        handleTootajaMenuClose
+                                                    }
+                                                >
+                                                    Список
+                                                </MenuItem>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/tootaja/create"
+                                                    onClick={
+                                                        handleTootajaMenuClose
+                                                    }
+                                                >
+                                                    Добавить
+                                                </MenuItem>
+                                            </Menu>
+                                        </Box>
+                                    )}
                                 </Stack>
                             </Box>
                             <Stack

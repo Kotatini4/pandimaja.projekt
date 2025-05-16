@@ -24,6 +24,10 @@ exports.updateTootaja = async (req, res) => {
                     .json({ message: "role_id must be 1, 2 or 3." });
             }
             tootaja.role_id = role_id;
+            if (pass) {
+                const hashedPassword = await bcrypt.hash(pass, 10);
+                updateFields.pass = hashedPassword;
+            }
         }
 
         await tootaja.save();

@@ -1,13 +1,29 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import jwt_decode from "jwt-decode";
 
-// Создание контекста
 export const AuthContext = createContext();
 
-// Провайдер, оборачивает всё приложение
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
 
-    // Функция выхода
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const decoded = jwt_decode(token);
+                // если в токене есть роль, кикод и имя — восстанавливаем
+                setUser({
+                    roleId: decoded.roleId,
+                    kood: decoded.kood,
+                    name: decoded.name,
+                });
+            } catch (e) {
+                console.error("Ошибка при декодировании токена", e);
+                localStorage.removeItem("token");
+            }
+        }
+    }, []);
+
     const logout = () => {
         localStorage.removeItem("token");
         setUser(null);
@@ -20,7 +36,6 @@ export function AuthProvider({ children }) {
     );
 }
 
-// Хук для использования в компонентах
 export function useAuth() {
     return useContext(AuthContext);
 }
