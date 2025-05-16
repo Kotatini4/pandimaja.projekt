@@ -23,7 +23,7 @@ export default function Login() {
         try {
             const res = await api.post("/auth/login", { kood, pass });
             localStorage.setItem("token", res.data.token);
-            setUser({ kood });
+            setUser(res.data.user);
             navigate("/");
         } catch (err) {
             alert("Ошибка входа: неверный код или пароль");

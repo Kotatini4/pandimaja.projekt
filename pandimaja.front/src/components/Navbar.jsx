@@ -37,10 +37,14 @@ export default function Navbar() {
     const navLinks = [
         { to: "/", label: "Главная" },
         { to: "/contacts", label: "Контакты" },
-        { to: "/klient", label: "Клиенты" },
-        { to: "/toode", label: "Товары" },
-        { to: "/leping", label: "Договора" },
-        { to: "/worker", label: "Работники" },
+        ...(user && (user.roleId === 1 || user.roleId === 2)
+            ? [
+                  { to: "/klient", label: "Клиенты" },
+                  { to: "/toode", label: "Товары" },
+                  { to: "/leping", label: "Договора" },
+                  { to: "/tootaja", label: "Работники" },
+              ]
+            : []),
     ];
 
     return (
@@ -133,7 +137,9 @@ export default function Navbar() {
                             >
                                 {user ? (
                                     <>
-                                        <Typography>{user.kood}</Typography>
+                                        <Typography sx={{ mr: 1 }}>
+                                            {user.name}
+                                        </Typography>
                                         <Button
                                             color="inherit"
                                             onClick={handleLogout}

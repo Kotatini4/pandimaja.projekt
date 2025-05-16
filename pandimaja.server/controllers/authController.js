@@ -96,7 +96,15 @@ exports.login = async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
         );
 
-        res.json({ token });
+        res.json({
+            token,
+            user: {
+                kood: user.kood,
+                name: user.nimi,
+                perekonnanimi: user.perekonnanimi,
+                roleId: user.role_id,
+            },
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Server error during login." });
