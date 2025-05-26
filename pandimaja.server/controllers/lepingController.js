@@ -3,34 +3,32 @@ const initModels = require("../models/init-models");
 
 const models = initModels(sequelize);
 
+// Create new leping
 exports.createLeping = async (req, res) => {
     const { klient_id } = req.body;
 
     try {
-        // Получаем клиента
         const klient = await models.klient.findByPk(klient_id);
 
         if (!klient) {
-            return res.status(404).json({ message: "Клиент не найден." });
+            return res.status(404).json({ message: "Client not found." });
         }
 
-        // Проверяем статус
         if (klient.status.toLowerCase() === "blocked") {
             return res.status(403).json({
-                message: "Нельзя создать договор: клиент заблокирован.",
+                message: "Cannot create contract: client is blocked.",
             });
         }
 
-        // Создание договора
         const leping = await models.leping.create(req.body);
         res.status(201).json(leping);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Ошибка при создании договора." });
+        res.status(500).json({ message: "Error creating contract." });
     }
 };
 
-// Получение всех договоров
+// Get all lepingud
 exports.getAllLepingud = async (req, res) => {
     try {
         const lepingud = await models.leping.findAll({
@@ -52,49 +50,53 @@ exports.getAllLepingud = async (req, res) => {
         res.status(200).json(lepingud);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Ошибка при получении договоров." });
+        res.status(500).json({ message: "Error fetching contracts." });
     }
 };
 
-// Получение по ID
+// Get leping by ID
 exports.getLepingById = async (req, res) => {
     try {
         const leping = await models.leping.findByPk(req.params.id);
         if (!leping)
-            return res.status(404).json({ message: "Договор не найден." });
+            return res.status(404).json({ message: "Contract not found." });
+
         res.status(200).json(leping);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Ошибка при получении договора." });
+        res.status(500).json({ message: "Error fetching contract." });
     }
 };
 
-// Обновление
+// Update leping
 exports.updateLeping = async (req, res) => {
     try {
         const leping = await models.leping.findByPk(req.params.id);
         if (!leping)
-            return res.status(404).json({ message: "Договор не найден." });
+            return res.status(404).json({ message: "Contract not found." });
 
         await leping.update(req.body);
-        res.status(200).json({ message: "Договор обновлён", leping });
+        res.status(200).json({
+            message: "Contract updated successfully.",
+            leping,
+        });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Ошибка при обновлении." });
+        res.status(500).json({ message: "Error updating contract." });
     }
 };
 
-// Удаление
+// Delete leping
 exports.deleteLeping = async (req, res) => {
     try {
         const leping = await models.leping.findByPk(req.params.id);
         if (!leping)
-            return res.status(404).json({ message: "Договор не найден." });
+            return res.status(404).json({ message: "Contract not found." });
 
         await leping.destroy();
         res.status(204).send();
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Ошибка при удалении." });
+        res.status(500).json({ message: "Error deleting contract." });
     }
 };

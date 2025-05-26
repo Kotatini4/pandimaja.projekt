@@ -200,7 +200,7 @@ exports.getToodedLaos = async (req, res) => {
     } catch (err) {
         console.error("Ошибка:", err);
         res.status(500).json({
-            message: "Ошибка при получении товаров со статусом 'Laos'.",
+            message: "Error fetching products with status 'Laos'.",
         });
     }
 };
