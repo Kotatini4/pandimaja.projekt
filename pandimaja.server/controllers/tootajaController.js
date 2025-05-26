@@ -90,8 +90,19 @@ exports.updateTootaja = async (req, res) => {
 };
 
 exports.getAllTootajad = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (page <= 0 || limit <= 0) {
+        return res
+            .status(400)
+            .json({ message: "Invalid pagination parameters." });
+    }
+
+    const offset = (page - 1) * limit;
+
     try {
-        const workers = await models.tootaja.findAll({
+        const { count, rows } = await models.tootaja.findAndCountAll({
             attributes: [
                 "tootaja_id",
                 "nimi",
@@ -101,10 +112,18 @@ exports.getAllTootajad = async (req, res) => {
                 "aadres",
                 "role_id",
             ],
+            limit,
+            offset,
             order: [["tootaja_id", "ASC"]],
         });
 
-        res.status(200).json(workers);
+        res.status(200).json({
+            total: count,
+            page,
+            pageSize: limit,
+            totalPages: Math.ceil(count / limit),
+            data: rows,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({
