@@ -35,17 +35,39 @@ exports.createKlient = async (req, res) => {
     }
 };
 
+const { Op } = require("sequelize");
+
 exports.getAllKlients = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (page <= 0 || limit <= 0) {
+        return res
+            .status(400)
+            .json({ message: "Invalid pagination parameters." });
+    }
+
+    const offset = (page - 1) * limit;
+
     try {
-        const klients = await models.klient.findAll();
-        res.status(200).json(klients);
+        const { count, rows } = await models.klient.findAndCountAll({
+            limit,
+            offset,
+            order: [["klient_id", "ASC"]],
+        });
+
+        res.status(200).json({
+            total: count,
+            page,
+            pageSize: limit,
+            totalPages: Math.ceil(count / limit),
+            data: rows,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error fetching clients." });
     }
 };
-
-const { Op } = require("sequelize"); // Импортируем Op для операторов like
 
 exports.searchKlients = async (req, res) => {
     const { nimi, perekonnanimi, kood } = req.query;
@@ -54,13 +76,13 @@ exports.searchKlients = async (req, res) => {
         const whereClause = {};
 
         if (nimi) {
-            whereClause.nimi = { [Op.iLike]: `%${nimi}%` }; // регистронезависимый поиск
+            whereClause.nimi = { [Op.iLike]: `%${nimi}%` };
         }
         if (perekonnanimi) {
             whereClause.perekonnanimi = { [Op.iLike]: `%${perekonnanimi}%` };
         }
         if (kood) {
-            whereClause.kood = { [Op.like]: `%${kood}%` }; // коды обычно точные, но можно частично
+            whereClause.kood = { [Op.like]: `%${kood}%` };
         }
 
         if (Object.keys(whereClause).length === 0) {

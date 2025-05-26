@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sequelize = require("../config/database");
 const initModels = require("../models/init-models");
-
 const models = initModels(sequelize);
 
 exports.register = async (req, res) => {
@@ -14,25 +13,39 @@ exports.register = async (req, res) => {
             .json({ message: "Please fill all required fields." });
     }
 
-    // Проверка длины kood
-    if (kood.length !== 11) {
+    // Проверка kood
+    if (kood.length !== 11 || !/^[0-9]+$/.test(kood)) {
         return res
             .status(400)
-            .json({ message: "Kood must be exactly 11 characters long." });
+            .json({ message: "Kood must be exactly 11 digits." });
     }
 
-    // Проверка длины пароля
+    // Проверка пароля
     if (pass.length < 6) {
         return res
             .status(400)
             .json({ message: "Password must be at least 6 characters long." });
     }
 
-    // Проверка допустимых ролей
-    if (![1, 2].includes(role_id)) {
-        return res.status(400).json({
-            message: "Invalid role_id. Only 1 (admin) or 2 (user) allowed.",
-        });
+    // Проверка роли
+    if (![1, 2, 3].includes(role_id)) {
+        return res
+            .status(400)
+            .json({
+                message:
+                    "Invalid role_id. Only 1 (admin), 2 (user), or 3 (NA) allowed.",
+            });
+    }
+
+    // Проверка телефона
+    const cleanTel = !tel || tel.trim() === "" ? null : tel.trim();
+    if (cleanTel && !/^\+?[0-9]+$/.test(cleanTel)) {
+        return res
+            .status(400)
+            .json({
+                message:
+                    "Phone number must contain only digits and optional leading +.",
+            });
     }
 
     try {
@@ -49,8 +62,8 @@ exports.register = async (req, res) => {
             nimi,
             perekonnanimi,
             kood,
-            tel,
-            aadres,
+            tel: cleanTel,
+            aadres: aadres?.trim() || null,
             pass: hashedPassword,
             role_id,
         });
@@ -91,7 +104,12 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user.tootaja_id, roleId: user.role_id },
+            {
+                userId: user.tootaja_id,
+                roleId: user.role_id,
+                kood: user.kood,
+                name: user.nimi,
+            },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || "12h" }
         );

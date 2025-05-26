@@ -11,6 +11,8 @@ import {
     Typography,
     Button,
     TablePagination,
+    MenuItem,
+    Select,
 } from "@mui/material";
 import api from "../services/api";
 
@@ -21,6 +23,12 @@ export default function Tootaja() {
     const [workers, setWorkers] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage] = useState(10);
+
+    const roles = [
+        { id: 1, name: "admin" },
+        { id: 2, name: "user" },
+        { id: 3, name: "NA" },
+    ];
 
     useEffect(() => {
         fetchWorkers();
@@ -46,11 +54,36 @@ export default function Tootaja() {
             return;
         }
 
+        if (!/^[0-9]{11}$/.test(form.kood)) {
+            alert("Kood должен содержать ровно 11 цифр.");
+            return;
+        }
+
+        if (form.pass && form.pass.length < 6) {
+            alert("Пароль должен содержать минимум 6 символов.");
+            return;
+        }
+
+        if (form.tel && !/^\+?[0-9]+$/.test(form.tel)) {
+            alert("Телефон может содержать только цифры и символ '+'.");
+            return;
+        }
+
+        if (form.role_id && ![1, 2, 3].includes(Number(form.role_id))) {
+            alert("Роль должна быть 1 (admin), 2 (user) или 3 (NA).");
+            return;
+        }
+
         try {
             await api.patch(`/tootaja/${form.tootaja_id}`, form);
             setToggledEditId(null);
             fetchWorkers();
         } catch (err) {
+            if (err.response?.data?.message) {
+                alert("Ошибка: " + err.response.data.message);
+            } else {
+                alert("Неизвестная ошибка при сохранении.");
+            }
             console.error("Ошибка сохранения", err);
         }
     };
@@ -207,44 +240,30 @@ export default function Tootaja() {
                                     </TableCell>
                                     <TableCell>
                                         {toggledEditId === w.tootaja_id ? (
-                                            <TextField
-                                                type="number"
+                                            <Select
                                                 value={form.role_id || ""}
                                                 onChange={(e) =>
                                                     setForm({
                                                         ...form,
-                                                        role_id: Number(
-                                                            e.target.value
-                                                        ),
+                                                        role_id: e.target.value,
                                                     })
                                                 }
                                                 size="small"
-                                            />
-                                        ) : (
-                                            w.role_id
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <TextField
-                                                value={form.pass || ""}
-                                                type="password"
-                                                placeholder="Новый пароль"
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        pass: e.target.value,
-                                                    })
-                                                }
-                                                size="small"
-                                            />
-                                        ) : (
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
+                                                fullWidth
                                             >
-                                                ••••••
-                                            </Typography>
+                                                {roles.map((role) => (
+                                                    <MenuItem
+                                                        key={role.id}
+                                                        value={role.id}
+                                                    >
+                                                        {role.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        ) : (
+                                            roles.find(
+                                                (r) => r.id === w.role_id
+                                            )?.name || "?"
                                         )}
                                     </TableCell>
                                     <TableCell>

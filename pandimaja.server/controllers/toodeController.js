@@ -31,9 +31,31 @@ exports.createToode = async (req, res) => {
 };
 
 exports.getAllTooded = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    if (page <= 0 || limit <= 0) {
+        return res
+            .status(400)
+            .json({ message: "Invalid pagination parameters." });
+    }
+
+    const offset = (page - 1) * limit;
+
     try {
-        const tooded = await models.toode.findAll();
-        res.status(200).json(tooded);
+        const { count, rows } = await models.toode.findAndCountAll({
+            limit,
+            offset,
+            order: [["toode_id", "ASC"]],
+        });
+
+        res.status(200).json({
+            total: count,
+            page,
+            pageSize: limit,
+            totalPages: Math.ceil(count / limit),
+            data: rows,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error fetching products." });
@@ -41,24 +63,33 @@ exports.getAllTooded = async (req, res) => {
 };
 
 exports.searchTooded = async (req, res) => {
-    const { nimetus } = req.query;
+    const { q, status_id, minPrice, maxPrice } = req.query;
 
-    if (!nimetus) {
-        return res
-            .status(400)
-            .json({ message: "Search parameter 'nimetus' is required." });
+    const whereClause = {};
+
+    if (q && typeof q === "string") {
+        whereClause[Op.or] = [
+            { nimetus: { [Op.iLike]: `%${q.trim()}%` } },
+            { kirjeldus: { [Op.iLike]: `%${q.trim()}%` } },
+        ];
+    }
+
+    if (status_id) {
+        whereClause.status_id = status_id;
+    }
+
+    if (minPrice || maxPrice) {
+        whereClause.hind = {};
+        if (minPrice) whereClause.hind[Op.gte] = Number(minPrice);
+        if (maxPrice) whereClause.hind[Op.lte] = Number(maxPrice);
     }
 
     try {
-        const tooded = await models.toode.findAll({
-            where: {
-                nimetus: { [Op.iLike]: `%${nimetus}%` },
-            },
-        });
-        res.status(200).json(tooded);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error searching products." });
+        const result = await models.toode.findAll({ where: whereClause });
+        res.status(200).json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error while searching products." });
     }
 };
 

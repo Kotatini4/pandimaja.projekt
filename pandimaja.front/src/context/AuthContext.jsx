@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
 
@@ -10,15 +10,14 @@ export function AuthProvider({ children }) {
         const token = localStorage.getItem("token");
         if (token) {
             try {
-                const decoded = jwt_decode(token);
-                // если в токене есть роль, кикод и имя — восстанавливаем
+                const decoded = jwtDecode(token); // ← и тут исправлено
                 setUser({
                     roleId: decoded.roleId,
                     kood: decoded.kood,
                     name: decoded.name,
                 });
             } catch (e) {
-                console.error("Ошибка при декодировании токена", e);
+                console.error("Ошибка декодирования токена", e);
                 localStorage.removeItem("token");
             }
         }

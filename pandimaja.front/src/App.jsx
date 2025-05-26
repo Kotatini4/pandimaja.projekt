@@ -14,6 +14,7 @@ import Leping from "./pages/Leping";
 import Login from "./pages/Login";
 import Contacts from "./pages/Contacts";
 import Tootaja from "./pages/Tootaja";
+import TootajaCreate from "./pages/TootajaCreate";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 function AppRoutes() {
@@ -61,6 +62,16 @@ function AppRoutes() {
                 element={
                     user && (user.roleId === 1 || user.roleId === 2) ? (
                         <Tootaja />
+                    ) : (
+                        <Navigate to="/login" />
+                    )
+                }
+            />
+            <Route
+                path="/tootaja/create"
+                element={
+                    user && user.roleId === 1 ? (
+                        <TootajaCreate />
                     ) : (
                         <Navigate to="/login" />
                     )

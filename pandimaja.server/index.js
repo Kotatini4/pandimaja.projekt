@@ -1,5 +1,11 @@
 const express = require("express");
 require("dotenv").config();
+
+// Очистка кэша всех модулей перед загрузкой приложениия
+Object.keys(require.cache).forEach((key) => {
+    delete require.cache[key];
+});
+
 const app = express();
 
 const sequelize = require("./config/database");

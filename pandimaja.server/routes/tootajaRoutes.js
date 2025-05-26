@@ -85,4 +85,30 @@ router.patch("/:id", verifyToken, isAdmin, tootajaController.updateTootaja);
 // Получить список всех работников
 router.get("/", verifyToken, isUserOrAdmin, tootajaController.getAllTootajad);
 
+/**
+ * @swagger
+ * /api/tootaja/{id}:
+ *   delete:
+ *     summary: Удалить работника по ID (только для admin)
+ *     tags: [Tootaja]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID работника
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Работник успешно удалён
+ *       404:
+ *         description: Работник не найден
+ *       500:
+ *         description: Ошибка сервера
+ */
+
+router.delete("/:id", verifyToken, isAdmin, tootajaController.deleteTootaja);
+
 module.exports = router;
