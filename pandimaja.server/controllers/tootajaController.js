@@ -17,13 +17,45 @@ exports.updateTootaja = async (req, res) => {
 
         // Проверка и установка kood
         if (kood) {
-            if (kood.length !== 11 || !/^[0-9]+$/.test(kood)) {
-                return res
-                    .status(400)
-                    .json({ message: "Kood must be exactly 11 digits." });
+            if (!/^[1-6][0-9]{10}$/.test(kood)) {
+                return res.status(400).json({
+                    message: "Kood must be 11 digits and start with 1–6.",
+                });
             }
 
-            // Проверка уникальности
+            // Валидация даты рождения в kood
+            const genderCode = parseInt(kood[0]);
+            const yearPart = kood.substring(1, 3);
+            const month = parseInt(kood.substring(3, 5));
+            const day = parseInt(kood.substring(5, 7));
+
+            let year;
+            if (genderCode === 1 || genderCode === 2)
+                year = 1800 + parseInt(yearPart);
+            else if (genderCode === 3 || genderCode === 4)
+                year = 1900 + parseInt(yearPart);
+            else if (genderCode === 5 || genderCode === 6)
+                year = 2000 + parseInt(yearPart);
+            else {
+                return res
+                    .status(400)
+                    .json({ message: "Invalid gender/century code in kood." });
+            }
+
+            const dateValid = !isNaN(
+                Date.parse(
+                    `${year}-${String(month).padStart(2, "0")}-${String(
+                        day
+                    ).padStart(2, "0")}`
+                )
+            );
+            if (!dateValid) {
+                return res
+                    .status(400)
+                    .json({ message: "Invalid birthdate in kood." });
+            }
+
+            // Проверка на уникальность kood
             const existing = await models.tootaja.findOne({
                 where: { kood },
             });

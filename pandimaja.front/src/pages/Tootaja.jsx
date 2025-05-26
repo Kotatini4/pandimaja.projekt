@@ -13,6 +13,7 @@ import {
     TablePagination,
     MenuItem,
     Select,
+    Stack,
 } from "@mui/material";
 import api from "../services/api";
 
@@ -23,6 +24,7 @@ export default function Tootaja() {
     const [workers, setWorkers] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage] = useState(10);
+    const [total, setTotal] = useState(0);
 
     const roles = [
         { id: 1, name: "admin" },
@@ -30,47 +32,75 @@ export default function Tootaja() {
         { id: 3, name: "NA" },
     ];
 
-    useEffect(() => {
-        fetchWorkers();
-    }, []);
-
     const fetchWorkers = async () => {
         try {
-            const res = await api.get("/tootaja");
-            setWorkers(res.data);
+            const res = await api.get(
+                `/tootaja?page=${page + 1}&limit=${rowsPerPage}`
+            );
+            setWorkers(res.data.data);
+            setTotal(res.data.total);
         } catch (err) {
-            console.error("Ошибка загрузки работников", err);
+            console.error("Error loading employees", err);
         }
     };
+
+    useEffect(() => {
+        fetchWorkers();
+    }, [page]);
 
     const handleEdit = (worker) => {
         setToggledEditId(worker.tootaja_id);
         setForm({ ...worker, pass: "" });
     };
 
+    const handleDelete = async (id) => {
+        const confirm1 = window.confirm(
+            "Are you sure you want to delete this employee?"
+        );
+        if (!confirm1) return;
+        const confirm2 = window.confirm(
+            "This action cannot be undone. Proceed?"
+        );
+        if (!confirm2) return;
+        const confirm3 = window.confirm(
+            "Final confirmation: Delete permanently?"
+        );
+        if (!confirm3) return;
+
+        try {
+            await api.delete(`/tootaja/${id}`);
+            fetchWorkers();
+            alert("Employee deleted.");
+        } catch (err) {
+            const msg =
+                err.response?.data?.message || "Unknown error while deleting.";
+            alert(msg);
+        }
+    };
+
     const handleSave = async () => {
         if (!form.nimi || !form.perekonnanimi || !form.kood) {
-            alert("Имя, фамилия и код обязательны для заполнения.");
+            alert("Name, surname, and kood are required.");
             return;
         }
 
         if (!/^[0-9]{11}$/.test(form.kood)) {
-            alert("Kood должен содержать ровно 11 цифр.");
+            alert("Kood must be exactly 11 digits.");
             return;
         }
 
         if (form.pass && form.pass.length < 6) {
-            alert("Пароль должен содержать минимум 6 символов.");
+            alert("Password must be at least 6 characters.");
             return;
         }
 
         if (form.tel && !/^\+?[0-9]+$/.test(form.tel)) {
-            alert("Телефон может содержать только цифры и символ '+'.");
+            alert("Phone must contain only numbers and optional leading +.");
             return;
         }
 
         if (form.role_id && ![1, 2, 3].includes(Number(form.role_id))) {
-            alert("Роль должна быть 1 (admin), 2 (user) или 3 (NA).");
+            alert("Role must be 1 (admin), 2 (user), or 3 (NA).");
             return;
         }
 
@@ -79,31 +109,22 @@ export default function Tootaja() {
             setToggledEditId(null);
             fetchWorkers();
         } catch (err) {
-            if (err.response?.data?.message) {
-                alert("Ошибка: " + err.response.data.message);
-            } else {
-                alert("Неизвестная ошибка при сохранении.");
-            }
-            console.error("Ошибка сохранения", err);
+            const msg =
+                err.response?.data?.message || "Unknown error while saving.";
+            alert(msg);
         }
     };
-
-    const filtered = workers.filter((w) =>
-        [w.nimi, w.perekonnanimi, w.kood, w.tootaja_id?.toString()].some(
-            (field) => field?.toLowerCase().includes(search.toLowerCase())
-        )
-    );
 
     const handleChangePage = (event, newPage) => setPage(newPage);
 
     return (
         <Container sx={{ mt: 4 }}>
             <Typography variant="h5" gutterBottom>
-                Список работников
+                Employee List
             </Typography>
 
             <TextField
-                label="Поиск по имени, коду или ID"
+                label="Search by name, code or ID"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 fullWidth
@@ -115,182 +136,199 @@ export default function Tootaja() {
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
-                            <TableCell>Имя</TableCell>
-                            <TableCell>Фамилия</TableCell>
+                            <TableCell>First Name</TableCell>
+                            <TableCell>Last Name</TableCell>
                             <TableCell>Kood</TableCell>
-                            <TableCell>Пароль</TableCell>
-                            <TableCell>Телефон</TableCell>
-                            <TableCell>Адрес</TableCell>
-                            <TableCell>Роль</TableCell>
-                            <TableCell>Действие</TableCell>
+                            <TableCell>Password</TableCell>
+                            <TableCell>Phone</TableCell>
+                            <TableCell>Address</TableCell>
+                            <TableCell>Role</TableCell>
+                            <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filtered
-                            .slice(
-                                page * rowsPerPage,
-                                page * rowsPerPage + rowsPerPage
-                            )
-                            .map((w) => (
-                                <TableRow key={w.tootaja_id}>
-                                    <TableCell>{w.tootaja_id}</TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <TextField
-                                                value={form.nimi || ""}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        nimi: e.target.value,
-                                                    })
-                                                }
-                                                size="small"
-                                            />
-                                        ) : (
-                                            w.nimi
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <TextField
-                                                value={form.perekonnanimi || ""}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        perekonnanimi:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                                size="small"
-                                            />
-                                        ) : (
-                                            w.perekonnanimi
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <TextField
-                                                value={form.kood || ""}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        kood: e.target.value,
-                                                    })
-                                                }
-                                                size="small"
-                                            />
-                                        ) : (
-                                            w.kood
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <TextField
-                                                value={form.pass || ""}
-                                                type="password"
-                                                placeholder="Новый пароль"
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        pass: e.target.value,
-                                                    })
-                                                }
-                                                size="small"
-                                            />
-                                        ) : (
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                            >
-                                                ••••••
-                                            </Typography>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <TextField
-                                                value={form.tel || ""}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        tel: e.target.value,
-                                                    })
-                                                }
-                                                size="small"
-                                            />
-                                        ) : (
-                                            w.tel
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <TextField
-                                                value={form.aadres || ""}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        aadres: e.target.value,
-                                                    })
-                                                }
-                                                size="small"
-                                            />
-                                        ) : (
-                                            w.aadres
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <Select
-                                                value={form.role_id || ""}
-                                                onChange={(e) =>
-                                                    setForm({
-                                                        ...form,
-                                                        role_id: e.target.value,
-                                                    })
-                                                }
-                                                size="small"
-                                                fullWidth
-                                            >
-                                                {roles.map((role) => (
-                                                    <MenuItem
-                                                        key={role.id}
-                                                        value={role.id}
-                                                    >
-                                                        {role.name}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        ) : (
-                                            roles.find(
-                                                (r) => r.id === w.role_id
-                                            )?.name || "?"
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
+                        {workers.map((w) => (
+                            <TableRow key={w.tootaja_id}>
+                                <TableCell>{w.tootaja_id}</TableCell>
+                                <TableCell>
+                                    {toggledEditId === w.tootaja_id ? (
+                                        <TextField
+                                            value={form.nimi || ""}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    nimi: e.target.value,
+                                                })
+                                            }
+                                            size="small"
+                                        />
+                                    ) : (
+                                        w.nimi
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {toggledEditId === w.tootaja_id ? (
+                                        <TextField
+                                            value={form.perekonnanimi || ""}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    perekonnanimi:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            size="small"
+                                        />
+                                    ) : (
+                                        w.perekonnanimi
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {toggledEditId === w.tootaja_id ? (
+                                        <TextField
+                                            value={form.kood || ""}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    kood: e.target.value,
+                                                })
+                                            }
+                                            size="small"
+                                        />
+                                    ) : (
+                                        w.kood
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {toggledEditId === w.tootaja_id ? (
+                                        <TextField
+                                            value={form.pass || ""}
+                                            type="password"
+                                            placeholder="New password"
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    pass: e.target.value,
+                                                })
+                                            }
+                                            size="small"
+                                        />
+                                    ) : (
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                        >
+                                            ••••••
+                                        </Typography>
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {toggledEditId === w.tootaja_id ? (
+                                        <TextField
+                                            value={form.tel || ""}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    tel: e.target.value,
+                                                })
+                                            }
+                                            size="small"
+                                        />
+                                    ) : (
+                                        w.tel
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {toggledEditId === w.tootaja_id ? (
+                                        <TextField
+                                            value={form.aadres || ""}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    aadres: e.target.value,
+                                                })
+                                            }
+                                            size="small"
+                                        />
+                                    ) : (
+                                        w.aadres
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {toggledEditId === w.tootaja_id ? (
+                                        <Select
+                                            value={form.role_id || ""}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    role_id: e.target.value,
+                                                })
+                                            }
+                                            size="small"
+                                            fullWidth
+                                        >
+                                            {roles.map((role) => (
+                                                <MenuItem
+                                                    key={role.id}
+                                                    value={role.id}
+                                                >
+                                                    {role.name}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    ) : (
+                                        roles.find((r) => r.id === w.role_id)
+                                            ?.name || "?"
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {toggledEditId === w.tootaja_id ? (
+                                        <Stack direction="column" spacing={1}>
                                             <Button
                                                 onClick={handleSave}
                                                 variant="contained"
                                                 size="small"
                                             >
-                                                Сохранить
+                                                Save
                                             </Button>
-                                        ) : (
+                                            <Button
+                                                onClick={() =>
+                                                    setToggledEditId(null)
+                                                }
+                                                variant="outlined"
+                                                size="small"
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </Stack>
+                                    ) : (
+                                        <Stack direction="column" spacing={1}>
                                             <Button
                                                 onClick={() => handleEdit(w)}
                                                 size="small"
+                                                variant="outlined"
                                             >
-                                                Редактировать
+                                                Edit
                                             </Button>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                            <Button
+                                                onClick={() =>
+                                                    handleDelete(w.tootaja_id)
+                                                }
+                                                size="small"
+                                                color="error"
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Stack>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
                 <TablePagination
                     component="div"
-                    count={filtered.length}
+                    count={total}
                     page={page}
                     onPageChange={handleChangePage}
                     rowsPerPage={rowsPerPage}

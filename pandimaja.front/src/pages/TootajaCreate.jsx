@@ -35,23 +35,23 @@ export default function TootajaCreate() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.nimi || !form.perekonnanimi || !form.kood || !form.pass) {
-            alert("Имя, фамилия, код и пароль обязательны.");
+            alert("Name, surname, ID and password are required.");
             return;
         }
 
         if (!/^[0-9]{11}$/.test(form.kood)) {
-            alert("Kood должен содержать ровно 11 цифр.");
+            alert("Kood must be exactly 11 digits.");
             return;
         }
 
         if (form.pass.length < 6) {
-            alert("Пароль должен быть не менее 6 символов.");
+            alert("Password must be at least 6 characters.");
             return;
         }
 
         try {
             await api.post("/auth/register", form);
-            alert("Пользователь успешно добавлен!");
+            alert("User registered successfully!");
             setForm({
                 nimi: "",
                 perekonnanimi: "",
@@ -62,17 +62,10 @@ export default function TootajaCreate() {
                 role_id: 2,
             });
         } catch (err) {
-            if (err.response?.data?.message) {
-                const msg = err.response.data.message;
-
-                if (msg.includes("User with this kood already exists")) {
-                    alert("❗ Такой пользователь уже существует.");
-                } else {
-                    alert("Ошибка: " + msg);
-                }
-            } else {
-                alert("Неизвестная ошибка при добавлении пользователя.");
-            }
+            const msg =
+                err.response?.data?.message ||
+                "Unknown error while adding user.";
+            alert(msg);
         }
     };
 
@@ -80,12 +73,12 @@ export default function TootajaCreate() {
         <Container maxWidth="sm" sx={{ mt: 4 }}>
             <Paper sx={{ p: 4 }}>
                 <Typography variant="h5" gutterBottom>
-                    Добавить нового работника
+                    Add New Employee
                 </Typography>
                 <form onSubmit={handleSubmit}>
                     <Stack spacing={2}>
                         <TextField
-                            label="Имя"
+                            label="First Name"
                             name="nimi"
                             value={form.nimi}
                             onChange={handleChange}
@@ -93,7 +86,7 @@ export default function TootajaCreate() {
                             required
                         />
                         <TextField
-                            label="Фамилия"
+                            label="Last Name"
                             name="perekonnanimi"
                             value={form.perekonnanimi}
                             onChange={handleChange}
@@ -101,7 +94,7 @@ export default function TootajaCreate() {
                             required
                         />
                         <TextField
-                            label="Kood (11 цифр)"
+                            label="Isikukood (11 digits)"
                             name="kood"
                             value={form.kood}
                             onChange={handleChange}
@@ -109,7 +102,7 @@ export default function TootajaCreate() {
                             required
                         />
                         <TextField
-                            label="Пароль"
+                            label="Password"
                             name="pass"
                             type="password"
                             value={form.pass}
@@ -118,14 +111,14 @@ export default function TootajaCreate() {
                             required
                         />
                         <TextField
-                            label="Телефон"
+                            label="Phone"
                             name="tel"
                             value={form.tel}
                             onChange={handleChange}
                             fullWidth
                         />
                         <TextField
-                            label="Адрес"
+                            label="Address"
                             name="aadres"
                             value={form.aadres}
                             onChange={handleChange}
@@ -133,7 +126,7 @@ export default function TootajaCreate() {
                         />
                         <TextField
                             select
-                            label="Роль"
+                            label="Role"
                             name="role_id"
                             value={form.role_id}
                             onChange={handleChange}
@@ -146,7 +139,7 @@ export default function TootajaCreate() {
                             ))}
                         </TextField>
                         <Button type="submit" variant="contained">
-                            Добавить
+                            Add Employee
                         </Button>
                     </Stack>
                 </form>
