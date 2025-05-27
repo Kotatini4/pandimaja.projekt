@@ -111,4 +111,11 @@ router.get("/", verifyToken, isUserOrAdmin, tootajaController.getAllTootajad);
 
 router.delete("/:id", verifyToken, isAdmin, tootajaController.deleteTootaja);
 
+router.get(
+    "/search",
+    verifyToken,
+    isUserOrAdmin,
+    tootajaController.searchTootajad
+);
+
 module.exports = router;

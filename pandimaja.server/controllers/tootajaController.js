@@ -182,3 +182,44 @@ exports.deleteTootaja = async (req, res) => {
         res.status(500).json({ message: "Server error during deletion." });
     }
 };
+
+exports.searchTootajad = async (req, res) => {
+    const { nimi, perekonnanimi, kood } = req.query;
+    const searchTerm = nimi || perekonnanimi || kood;
+
+    if (!searchTerm) {
+        return res.status(400).json({
+            message:
+                "Please provide a search term (nimi, perekonnanimi, or kood).",
+        });
+    }
+
+    try {
+        const tootajad = await models.tootaja.findAll({
+            attributes: [
+                "tootaja_id",
+                "nimi",
+                "perekonnanimi",
+                "kood",
+                "tel",
+                "aadres",
+                "role_id",
+            ],
+            where: {
+                [Op.or]: [
+                    { nimi: { [Op.iLike]: `%${searchTerm}%` } },
+                    { perekonnanimi: { [Op.iLike]: `%${searchTerm}%` } },
+                    { kood: { [Op.like]: `%${searchTerm}%` } },
+                ],
+            },
+            order: [["tootaja_id", "ASC"]],
+        });
+
+        res.status(200).json(tootajad);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Server error while searching employees.",
+        });
+    }
+};

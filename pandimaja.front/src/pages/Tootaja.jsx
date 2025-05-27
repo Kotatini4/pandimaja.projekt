@@ -34,13 +34,28 @@ export default function Tootaja() {
 
     const fetchWorkers = async () => {
         try {
-            const res = await api.get(
-                `/tootaja?page=${page + 1}&limit=${rowsPerPage}`
-            );
-            setWorkers(res.data.data);
-            setTotal(res.data.total);
+            if (search.trim()) {
+                const res = await api.get("/tootaja/search", {
+                    params: {
+                        nimi: search.trim(),
+                        perekonnanimi: search.trim(),
+                        kood: search.trim(),
+                    },
+                });
+                setWorkers(res.data);
+                setTotal(res.data.length);
+            } else {
+                const res = await api.get(
+                    `/tootaja?page=${page + 1}&limit=${rowsPerPage}`
+                );
+                setWorkers(res.data.data);
+                setTotal(res.data.total);
+            }
         } catch (err) {
             console.error("Error loading employees", err);
+            setWorkers([]);
+            setTotal(0);
+            alert(err.response?.data?.message || "Error loading employees");
         }
     };
 
@@ -48,33 +63,39 @@ export default function Tootaja() {
         fetchWorkers();
     }, [page]);
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (search.trim()) {
+                fetchWorkers();
+            } else {
+                setPage(0);
+                fetchWorkers();
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
+
     const handleEdit = (worker) => {
         setToggledEditId(worker.tootaja_id);
         setForm({ ...worker, pass: "" });
     };
 
     const handleDelete = async (id) => {
-        const confirm1 = window.confirm(
-            "Are you sure you want to delete this employee?"
-        );
-        if (!confirm1) return;
-        const confirm2 = window.confirm(
-            "This action cannot be undone. Proceed?"
-        );
-        if (!confirm2) return;
-        const confirm3 = window.confirm(
-            "Final confirmation: Delete permanently?"
-        );
-        if (!confirm3) return;
-
-        try {
-            await api.delete(`/tootaja/${id}`);
-            fetchWorkers();
-            alert("Employee deleted.");
-        } catch (err) {
-            const msg =
-                err.response?.data?.message || "Unknown error while deleting.";
-            alert(msg);
+        if (
+            window.confirm("Are you sure you want to delete this employee?") &&
+            window.confirm("This action cannot be undone. Proceed?") &&
+            window.confirm("Final confirmation: Delete permanently?")
+        ) {
+            try {
+                await api.delete(`/tootaja/${id}`);
+                fetchWorkers();
+                alert("Employee deleted.");
+            } catch (err) {
+                const msg =
+                    err.response?.data?.message ||
+                    "Unknown error while deleting.";
+                alert(msg);
+            }
         }
     };
 
@@ -124,7 +145,7 @@ export default function Tootaja() {
             </Typography>
 
             <TextField
-                label="Search by name, code or ID"
+                label="Search by name or ID code"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 fullWidth

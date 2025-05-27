@@ -71,28 +71,25 @@ exports.getAllKlients = async (req, res) => {
 
 exports.searchKlients = async (req, res) => {
     const { nimi, perekonnanimi, kood } = req.query;
+    const searchTerm = nimi || perekonnanimi || kood;
 
     try {
-        const whereClause = {};
-
-        if (nimi) {
-            whereClause.nimi = { [Op.iLike]: `%${nimi}%` };
-        }
-        if (perekonnanimi) {
-            whereClause.perekonnanimi = { [Op.iLike]: `%${perekonnanimi}%` };
-        }
-        if (kood) {
-            whereClause.kood = { [Op.like]: `%${kood}%` };
-        }
-
-        if (Object.keys(whereClause).length === 0) {
+        if (!searchTerm) {
             return res.status(400).json({
                 message:
-                    "Please provide at least one search parameter (nimi, perekonnanimi, or kood).",
+                    "Please provide a search parameter (nimi, perekonnanimi, or kood).",
             });
         }
 
-        const klients = await models.klient.findAll({ where: whereClause });
+        const klients = await models.klient.findAll({
+            where: {
+                [Op.or]: [
+                    { nimi: { [Op.iLike]: `%${searchTerm}%` } },
+                    { perekonnanimi: { [Op.iLike]: `%${searchTerm}%` } },
+                    { kood: { [Op.like]: `%${searchTerm}%` } },
+                ],
+            },
+        });
 
         res.status(200).json(klients);
     } catch (error) {
