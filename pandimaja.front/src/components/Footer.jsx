@@ -26,19 +26,21 @@ export default function Footer() {
                     </Typography>
                     <Typography>Ehitajate tee 5</Typography>
                     <Typography>19086 Tallinn</Typography>
-                    <Typography>Eesti</Typography>
+                    <Typography>Estonia</Typography>
                     <Typography mt={1}>📞 620 2002</Typography>
                     <Typography>✉️ info@pandimaja.ee</Typography>
                 </Grid>
                 <Grid item xs={12} md={4}>
                     <Typography variant="h6" fontWeight="bold">
-                        Будь в курсе новостей
+                        Stay Updated
                     </Typography>
-                    <Typography>Подпишись на обновления и акции</Typography>
+                    <Typography>
+                        Subscribe for updates and special offers
+                    </Typography>
                 </Grid>
                 <Grid item xs={12} md={4}>
                     <Typography variant="h6" fontWeight="bold" mb={1}>
-                        Мы в соцсетях
+                        Follow us on social media
                     </Typography>
                     <Stack direction="row" spacing={2}>
                         <MuiLink color="inherit">
@@ -61,7 +63,7 @@ export default function Footer() {
             </Grid>
             <Box mt={4}>
                 <Stack direction="row" spacing={2} flexWrap="wrap">
-                    {["Контакты", "Портал", "Политика", "Этика", "FAQ"].map(
+                    {["Contact", "Portal", "Policy", "Ethics", "FAQ"].map(
                         (label) => (
                             <MuiLink
                                 key={label}

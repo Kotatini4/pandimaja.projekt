@@ -41,13 +41,13 @@ export default function Navbar() {
     const handleTootajaMenuClose = () => setTootajaMenuAnchor(null);
 
     const navLinks = [
-        { to: "/", label: "Главная" },
-        { to: "/contacts", label: "Контакты" },
+        { to: "/", label: "Home" },
+        { to: "/contacts", label: "Contacts" },
         ...(user && (user.roleId === 1 || user.roleId === 2)
             ? [
-                  { to: "/klient", label: "Клиенты" },
-                  { to: "/toode", label: "Товары" },
-                  { to: "/leping", label: "Договора" },
+                  { to: "/klient", label: "Clients" },
+                  { to: "/toode", label: "Products" },
+                  { to: "/leping", label: "Contracts" },
               ]
             : []),
     ];
@@ -101,28 +101,14 @@ export default function Navbar() {
                                             to="/tootaja"
                                             onClick={handleMenuClose}
                                         >
-                                            Список работников
+                                            Employee List
                                         </MenuItem>
                                         <MenuItem
                                             component={Link}
                                             to="/tootaja/create"
                                             onClick={handleMenuClose}
                                         >
-                                            Добавить
-                                        </MenuItem>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/tootaja/edit"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Редактировать
-                                        </MenuItem>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/tootaja/users"
-                                            onClick={handleMenuClose}
-                                        >
-                                            ID / Kood / Пароль
+                                            Add
                                         </MenuItem>
                                     </>
                                 )}
@@ -137,7 +123,7 @@ export default function Navbar() {
                                                 handleMenuClose();
                                             }}
                                         >
-                                            Выйти
+                                            Logout
                                         </MenuItem>
                                     </>
                                 ) : (
@@ -146,7 +132,7 @@ export default function Navbar() {
                                         to="/login"
                                         onClick={handleMenuClose}
                                     >
-                                        Вход
+                                        Login
                                     </MenuItem>
                                 )}
                             </Menu>
@@ -173,7 +159,7 @@ export default function Navbar() {
                                                     handleTootajaMenuOpen
                                                 }
                                             >
-                                                Работники
+                                                Employees
                                             </Button>
                                             <Menu
                                                 anchorEl={tootajaMenuAnchor}
@@ -193,7 +179,7 @@ export default function Navbar() {
                                                         handleTootajaMenuClose
                                                     }
                                                 >
-                                                    Список
+                                                    List
                                                 </MenuItem>
                                                 <MenuItem
                                                     component={Link}
@@ -202,7 +188,7 @@ export default function Navbar() {
                                                         handleTootajaMenuClose
                                                     }
                                                 >
-                                                    Добавить
+                                                    Add
                                                 </MenuItem>
                                             </Menu>
                                         </Box>
@@ -223,7 +209,7 @@ export default function Navbar() {
                                             color="inherit"
                                             onClick={handleLogout}
                                         >
-                                            Выйти
+                                            Logout
                                         </Button>
                                     </>
                                 ) : (
@@ -232,7 +218,7 @@ export default function Navbar() {
                                         component={Link}
                                         to="/login"
                                     >
-                                        Вход
+                                        Login
                                     </Button>
                                 )}
                             </Stack>

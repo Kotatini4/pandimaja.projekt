@@ -10,7 +10,16 @@ export function AuthProvider({ children }) {
         const token = localStorage.getItem("token");
         if (token) {
             try {
-                const decoded = jwtDecode(token); // ← и тут исправлено
+                const decoded = jwtDecode(token);
+
+                const now = Date.now() / 1000;
+                if (decoded.exp && decoded.exp < now) {
+                    console.log("Token expired");
+                    localStorage.removeItem("token");
+                    setUser(null);
+                    return;
+                }
+
                 setUser({
                     roleId: decoded.roleId,
                     kood: decoded.kood,
@@ -19,6 +28,7 @@ export function AuthProvider({ children }) {
             } catch (e) {
                 console.error("Ошибка декодирования токена", e);
                 localStorage.removeItem("token");
+                setUser(null);
             }
         }
     }, []);
