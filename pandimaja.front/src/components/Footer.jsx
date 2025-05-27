@@ -63,8 +63,17 @@ export default function Footer() {
             </Grid>
             <Box mt={4}>
                 <Stack direction="row" spacing={2} flexWrap="wrap">
-                    {["Contact", "Portal", "Policy", "Ethics", "FAQ"].map(
-                        (label) => (
+                    {["Contact", "Policy", "Ethics", "FAQ"].map((label) =>
+                        label === "Contact" ? (
+                            <MuiLink
+                                key={label}
+                                href="http://localhost:5173/contacts"
+                                color="inherit"
+                                underline="hover"
+                            >
+                                {label}
+                            </MuiLink>
+                        ) : (
                             <MuiLink
                                 key={label}
                                 color="inherit"
