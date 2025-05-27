@@ -25,6 +25,7 @@ export default function Navbar() {
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [tootajaMenuAnchor, setTootajaMenuAnchor] = useState(null);
+    const [klientMenuAnchor, setKlientMenuAnchor] = useState(null);
 
     const open = Boolean(anchorEl);
 
@@ -40,17 +41,9 @@ export default function Navbar() {
         setTootajaMenuAnchor(event.currentTarget);
     const handleTootajaMenuClose = () => setTootajaMenuAnchor(null);
 
-    const navLinks = [
-        { to: "/", label: "Home" },
-        { to: "/contacts", label: "Contacts" },
-        ...(user && (user.roleId === 1 || user.roleId === 2)
-            ? [
-                  { to: "/klient", label: "Clients" },
-                  { to: "/toode", label: "Products" },
-                  { to: "/leping", label: "Contracts" },
-              ]
-            : []),
-    ];
+    const handleKlientMenuOpen = (event) =>
+        setKlientMenuAnchor(event.currentTarget);
+    const handleKlientMenuClose = () => setKlientMenuAnchor(null);
 
     return (
         <AppBar
@@ -84,16 +77,56 @@ export default function Navbar() {
                                     horizontal: "right",
                                 }}
                             >
-                                {navLinks.map((link) => (
-                                    <MenuItem
-                                        key={link.to}
-                                        component={Link}
-                                        to={link.to}
-                                        onClick={handleMenuClose}
-                                    >
-                                        {link.label}
-                                    </MenuItem>
-                                ))}
+                                <MenuItem
+                                    component={Link}
+                                    to="/"
+                                    onClick={handleMenuClose}
+                                >
+                                    Home
+                                </MenuItem>
+                                <MenuItem
+                                    component={Link}
+                                    to="/contacts"
+                                    onClick={handleMenuClose}
+                                >
+                                    Contacts
+                                </MenuItem>
+                                {user?.roleId === 1 && (
+                                    <>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/klient"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Client List
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/klient/create"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Add Client
+                                        </MenuItem>
+                                    </>
+                                )}
+                                {(user?.roleId === 1 || user?.roleId === 2) && (
+                                    <>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/toode"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Products
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/leping"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Contracts
+                                        </MenuItem>
+                                    </>
+                                )}
                                 {user?.roleId === 1 && (
                                     <>
                                         <MenuItem
@@ -108,7 +141,7 @@ export default function Navbar() {
                                             to="/tootaja/create"
                                             onClick={handleMenuClose}
                                         >
-                                            Add
+                                            Add Employee
                                         </MenuItem>
                                     </>
                                 )}
@@ -141,16 +174,79 @@ export default function Navbar() {
                         <>
                             <Box sx={{ flexGrow: 1 }}>
                                 <Stack direction="row" spacing={2}>
-                                    {navLinks.map((link) => (
-                                        <Button
-                                            key={link.to}
-                                            color="inherit"
-                                            component={Link}
-                                            to={link.to}
-                                        >
-                                            {link.label}
-                                        </Button>
-                                    ))}
+                                    <Button
+                                        color="inherit"
+                                        component={Link}
+                                        to="/"
+                                    >
+                                        Home
+                                    </Button>
+                                    <Button
+                                        color="inherit"
+                                        component={Link}
+                                        to="/contacts"
+                                    >
+                                        Contacts
+                                    </Button>
+                                    {user?.roleId === 1 && (
+                                        <Box>
+                                            <Button
+                                                color="inherit"
+                                                onMouseEnter={
+                                                    handleKlientMenuOpen
+                                                }
+                                            >
+                                                Clients
+                                            </Button>
+                                            <Menu
+                                                anchorEl={klientMenuAnchor}
+                                                open={Boolean(klientMenuAnchor)}
+                                                onClose={handleKlientMenuClose}
+                                                MenuListProps={{
+                                                    onMouseLeave:
+                                                        handleKlientMenuClose,
+                                                }}
+                                            >
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/klient"
+                                                    onClick={
+                                                        handleKlientMenuClose
+                                                    }
+                                                >
+                                                    List
+                                                </MenuItem>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/klient/create"
+                                                    onClick={
+                                                        handleKlientMenuClose
+                                                    }
+                                                >
+                                                    Add
+                                                </MenuItem>
+                                            </Menu>
+                                        </Box>
+                                    )}
+                                    {(user?.roleId === 1 ||
+                                        user?.roleId === 2) && (
+                                        <>
+                                            <Button
+                                                color="inherit"
+                                                component={Link}
+                                                to="/toode"
+                                            >
+                                                Products
+                                            </Button>
+                                            <Button
+                                                color="inherit"
+                                                component={Link}
+                                                to="/leping"
+                                            >
+                                                Contracts
+                                            </Button>
+                                        </>
+                                    )}
                                     {user?.roleId === 1 && (
                                         <Box>
                                             <Button

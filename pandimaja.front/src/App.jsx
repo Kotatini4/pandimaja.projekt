@@ -15,6 +15,7 @@ import Login from "./pages/Login";
 import Contacts from "./pages/Contacts";
 import Tootaja from "./pages/Tootaja";
 import TootajaCreate from "./pages/TootajaCreate";
+import KlientCreate from "./pages/KlientCreate";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 function AppRoutes() {
@@ -27,6 +28,16 @@ function AppRoutes() {
             <Route path="/contacts" element={<Contacts />} />
 
             {/* Защищённые маршруты */}
+            <Route
+                path="/klient/create"
+                element={
+                    user && user.roleId === 1 ? (
+                        <KlientCreate />
+                    ) : (
+                        <Navigate to="/login" />
+                    )
+                }
+            />
             <Route
                 path="/klient"
                 element={
