@@ -111,6 +111,63 @@ router.get("/", verifyToken, isUserOrAdmin, tootajaController.getAllTootajad);
 
 router.delete("/:id", verifyToken, isAdmin, tootajaController.deleteTootaja);
 
+/**
+ * @swagger
+ * /api/tootaja/search:
+ *   get:
+ *     summary: Поиск работников по имени, фамилии или коду (только для администратора или работника)
+ *     tags: [Tootaja]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: nimi
+ *         in: query
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Имя работника (поиск по части имени)
+ *       - name: perekonnanimi
+ *         in: query
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Фамилия работника (поиск по части фамилии)
+ *       - name: kood
+ *         in: query
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Идентификационный код работника (поиск по части кода)
+ *     responses:
+ *       200:
+ *         description: Найденные работники
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   tootaja_id:
+ *                     type: integer
+ *                   nimi:
+ *                     type: string
+ *                   perekonnanimi:
+ *                     type: string
+ *                   kood:
+ *                     type: string
+ *                   tel:
+ *                     type: string
+ *                   aadres:
+ *                     type: string
+ *                   role_id:
+ *                     type: integer
+ *       400:
+ *         description: Не указан параметр поиска
+ *       500:
+ *         description: Ошибка сервера при поиске
+ */
+
 router.get(
     "/search",
     verifyToken,

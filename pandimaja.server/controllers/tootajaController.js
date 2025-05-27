@@ -183,6 +183,8 @@ exports.deleteTootaja = async (req, res) => {
     }
 };
 
+const { Op } = require("sequelize");
+
 exports.searchTootajad = async (req, res) => {
     const { nimi, perekonnanimi, kood } = req.query;
     const searchTerm = nimi || perekonnanimi || kood;
