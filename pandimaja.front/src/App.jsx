@@ -16,6 +16,7 @@ import Contacts from "./pages/Contacts";
 import Tootaja from "./pages/Tootaja";
 import TootajaCreate from "./pages/TootajaCreate";
 import KlientCreate from "./pages/KlientCreate";
+import ToodeCreate from "./pages/ToodeCreate";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 function AppRoutes() {
@@ -31,7 +32,7 @@ function AppRoutes() {
             <Route
                 path="/klient/create"
                 element={
-                    user && user.roleId === 1 ? (
+                    user && (user.roleId === 1 || user.roleId === 2) ? (
                         <KlientCreate />
                     ) : (
                         <Navigate to="/login" />
@@ -53,6 +54,16 @@ function AppRoutes() {
                 element={
                     user && (user.roleId === 1 || user.roleId === 2) ? (
                         <Toode />
+                    ) : (
+                        <Navigate to="/login" />
+                    )
+                }
+            />
+            <Route
+                path="/toode/create"
+                element={
+                    user && (user.roleId === 1 || user.roleId === 2) ? (
+                        <ToodeCreate />
                     ) : (
                         <Navigate to="/login" />
                     )

@@ -13,9 +13,10 @@ module.exports = function (sequelize, DataTypes) {
                 type: DataTypes.STRING(255),
                 allowNull: false,
             },
-            kirjaldus: {
+            kirjeldus: {
                 type: DataTypes.TEXT,
                 allowNull: true,
+                field: "kirjaldus", // соответствует названию в БД
             },
             status_id: {
                 type: DataTypes.INTEGER,

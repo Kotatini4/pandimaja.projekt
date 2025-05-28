@@ -177,17 +177,17 @@ export default function Toode() {
                                 <TableCell>
                                     {toggledEditId === p.toode_id ? (
                                         <TextField
-                                            value={form.kirjaldus || ""}
+                                            value={form.kirjeldus || ""}
                                             onChange={(e) =>
                                                 setForm({
                                                     ...form,
-                                                    kirjaldus: e.target.value,
+                                                    kirjeldus: e.target.value,
                                                 })
                                             }
                                             size="small"
                                         />
                                     ) : (
-                                        p.kirjaldus
+                                        p.kirjeldus
                                     )}
                                 </TableCell>
                                 <TableCell>
@@ -236,15 +236,31 @@ export default function Toode() {
                                 </TableCell>
                                 <TableCell>
                                     {p.image ? (
-                                        <img
-                                            src={p.image}
-                                            alt="product"
-                                            width={50}
-                                        />
+                                        <a
+                                            href={`http://localhost:3000${p.image}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                window.open(
+                                                    `http://localhost:3000${p.image}`,
+                                                    "popup",
+                                                    "width=600,height=400"
+                                                );
+                                            }}
+                                        >
+                                            <img
+                                                src={`http://localhost:3000${p.image}`}
+                                                alt="product"
+                                                width={50}
+                                                style={{ cursor: "pointer" }}
+                                            />
+                                        </a>
                                     ) : (
                                         "No image"
                                     )}
                                 </TableCell>
+
                                 <TableCell>
                                     {toggledEditId === p.toode_id ? (
                                         <Stack direction="column" spacing={1}>

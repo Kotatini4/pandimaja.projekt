@@ -108,7 +108,7 @@ export default function Home() {
                                     variant="body2"
                                     color="text.secondary"
                                 >
-                                    {product.kirjaldus}
+                                    {product.kirjeldus}
                                 </Typography>
                                 <Typography sx={{ mt: 1, fontWeight: "bold" }}>
                                     {product.hind}

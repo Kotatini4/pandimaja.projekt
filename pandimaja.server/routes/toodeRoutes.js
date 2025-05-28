@@ -5,7 +5,6 @@ const multer = require("multer");
 const path = require("path");
 const { verifyToken, isUserOrAdmin } = require("../middleware/authMiddleware");
 
-// Сначала создаём storage и upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "public/uploads/");
@@ -16,51 +15,35 @@ const storage = multer.diskStorage({
         cb(null, uniqueName);
     },
 });
-
 const upload = multer({ storage });
+
+/**
+ * @swagger
+ * tags:
+ *   name: Toode
+ *   description: API for managing products
+ */
 
 /**
  * @swagger
  * /api/toode/laos:
  *   get:
- *     summary: Получить все товары со статусом "Laos" Это для просмотра товара продающегося в магазине, для всех!
+ *     summary: Get all products with status "Laos"
  *     tags: [Toode]
  *     responses:
  *       200:
- *         description: Список товаров на складе
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   toode_id:
- *                     type: integer
- *                   nimetus:
- *                     type: string
- *                   kirjaldus:
- *                     type: string
- *                   status_id:
- *                     type: integer
- *                   image:
- *                     type: string
- *                   hind:
- *                     type: number
- *       500:
- *         description: Ошибка при получении данных
+ *         description: List of available products
  */
-
 router.get("/laos", toodeController.getToodedLaos);
 
 /**
  * @swagger
  * /api/toode:
  *   post:
- *     summary: Создать новый товар с изображением (только для администратора или работника)
+ *     summary: Create a new product (requires auth)
  *     tags: [Toode]
- *     consumes:
- *       - multipart/form-data
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -74,18 +57,18 @@ router.get("/laos", toodeController.getToodedLaos);
  *             properties:
  *               nimetus:
  *                 type: string
- *               kirjaldus:
+ *               kirjeldus:
  *                 type: string
  *               status_id:
  *                 type: integer
+ *               hind:
+ *                 type: number
  *               image:
  *                 type: string
  *                 format: binary
- *               hind:
- *                 type: number
  *     responses:
  *       201:
- *         description: Товар успешно создан
+ *         description: Product created
  */
 router.post(
     "/",
@@ -99,11 +82,22 @@ router.post(
  * @swagger
  * /api/toode:
  *   get:
- *     summary: Получить список всех товаров (только для администратора или работника)
+ *     summary: Get paginated list of products
  *     tags: [Toode]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         schema:
+ *           type: integer
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Список товаров
+ *         description: Paginated product list
  */
 router.get("/", verifyToken, isUserOrAdmin, toodeController.getAllTooded);
 
@@ -111,17 +105,26 @@ router.get("/", verifyToken, isUserOrAdmin, toodeController.getAllTooded);
  * @swagger
  * /api/toode/search:
  *   get:
- *     summary: Поиск товара по наименованию (только для администратора или работника)
+ *     summary: Search products by name, description or status
  *     tags: [Toode]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: nimetus
  *         in: query
- *         required: true
+ *         schema:
+ *           type: string
+ *       - name: kirjeldus
+ *         in: query
+ *         schema:
+ *           type: string
+ *       - name: status_id
+ *         in: query
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Список найденных товаров
+ *         description: Search results
  */
 router.get("/search", verifyToken, isUserOrAdmin, toodeController.searchTooded);
 
@@ -129,30 +132,32 @@ router.get("/search", verifyToken, isUserOrAdmin, toodeController.searchTooded);
  * @swagger
  * /api/toode/{id}:
  *   get:
- *     summary: Получить товар по ID (только для администратора или работника)
+ *     summary: Get product by ID
  *     tags: [Toode]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Информация о товаре
+ *         description: Product found
  *       404:
- *         description: Товар не найден
+ *         description: Not found
  */
 router.get("/:id", verifyToken, isUserOrAdmin, toodeController.getToodeById);
 
 /**
  * @swagger
  * /api/toode/{id}:
- *   put:
- *     summary: Обновить товар и/или изображение (только для администратора или работника)
+ *   patch:
+ *     summary: Update product partially
  *     tags: [Toode]
- *     consumes:
- *       - multipart/form-data
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -167,22 +172,22 @@ router.get("/:id", verifyToken, isUserOrAdmin, toodeController.getToodeById);
  *             properties:
  *               nimetus:
  *                 type: string
- *               kirjaldus:
+ *               kirjeldus:
  *                 type: string
  *               status_id:
  *                 type: integer
+ *               hind:
+ *                 type: number
  *               image:
  *                 type: string
  *                 format: binary
- *               hind:
- *                 type: number
  *     responses:
  *       200:
- *         description: Товар обновлён
+ *         description: Product updated
  *       404:
- *         description: Товар не найден
+ *         description: Not found
  */
-router.put(
+router.patch(
     "/:id",
     verifyToken,
     isUserOrAdmin,
@@ -194,19 +199,21 @@ router.put(
  * @swagger
  * /api/toode/{id}:
  *   delete:
- *     summary: Удалить товар по ID (только для администратора или работника)
+ *     summary: Delete product by ID
  *     tags: [Toode]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
- *         required: true
  *         schema:
  *           type: integer
+ *         required: true
  *     responses:
  *       204:
- *         description: Товар успешно удалён
+ *         description: Product deleted
  *       404:
- *         description: Товар не найден
+ *         description: Not found
  */
 router.delete("/:id", verifyToken, isUserOrAdmin, toodeController.deleteToode);
 
@@ -214,8 +221,10 @@ router.delete("/:id", verifyToken, isUserOrAdmin, toodeController.deleteToode);
  * @swagger
  * /api/toode/status/{status_id}:
  *   get:
- *     summary: Получить список товаров по статусу (только для администратора или работника)
+ *     summary: Get products by status
  *     tags: [Toode]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: status_id
  *         in: path
@@ -224,9 +233,9 @@ router.delete("/:id", verifyToken, isUserOrAdmin, toodeController.deleteToode);
  *           type: integer
  *     responses:
  *       200:
- *         description: Список товаров с указанным статусом
+ *         description: Products with given status
  *       404:
- *         description: Товары с таким статусом не найдены
+ *         description: Not found
  */
 router.get(
     "/status/:status_id",

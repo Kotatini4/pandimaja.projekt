@@ -282,6 +282,7 @@ export default function Klient() {
                                                 Edit
                                             </Button>
                                             <Button
+                                                variant="outlined"
                                                 size="small"
                                                 color="error"
                                                 onClick={() =>

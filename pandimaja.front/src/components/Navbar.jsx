@@ -26,6 +26,7 @@ export default function Navbar() {
     const [anchorEl, setAnchorEl] = useState(null);
     const [tootajaMenuAnchor, setTootajaMenuAnchor] = useState(null);
     const [klientMenuAnchor, setKlientMenuAnchor] = useState(null);
+    const [productMenuAnchor, setProductMenuAnchor] = useState(null); // добавлено
 
     const open = Boolean(anchorEl);
 
@@ -91,7 +92,7 @@ export default function Navbar() {
                                 >
                                     Contacts
                                 </MenuItem>
-                                {user?.roleId === 1 && (
+                                {(user?.roleId === 1 || user?.roleId === 2) && (
                                     <>
                                         <MenuItem
                                             component={Link}
@@ -116,7 +117,14 @@ export default function Navbar() {
                                             to="/toode"
                                             onClick={handleMenuClose}
                                         >
-                                            Products
+                                            Product List
+                                        </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/toode/create"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Add Product
                                         </MenuItem>
                                         <MenuItem
                                             component={Link}
@@ -188,7 +196,9 @@ export default function Navbar() {
                                     >
                                         Contacts
                                     </Button>
-                                    {user?.roleId === 1 && (
+
+                                    {(user?.roleId === 1 ||
+                                        user?.roleId === 2) && (
                                         <Box>
                                             <Button
                                                 color="inherit"
@@ -228,25 +238,72 @@ export default function Navbar() {
                                             </Menu>
                                         </Box>
                                     )}
+
                                     {(user?.roleId === 1 ||
                                         user?.roleId === 2) && (
-                                        <>
+                                        <Box>
                                             <Button
                                                 color="inherit"
-                                                component={Link}
-                                                to="/toode"
+                                                onMouseEnter={(e) =>
+                                                    setProductMenuAnchor(
+                                                        e.currentTarget
+                                                    )
+                                                }
                                             >
                                                 Products
                                             </Button>
-                                            <Button
-                                                color="inherit"
-                                                component={Link}
-                                                to="/leping"
+                                            <Menu
+                                                anchorEl={productMenuAnchor}
+                                                open={Boolean(
+                                                    productMenuAnchor
+                                                )}
+                                                onClose={() =>
+                                                    setProductMenuAnchor(null)
+                                                }
+                                                MenuListProps={{
+                                                    onMouseLeave: () =>
+                                                        setProductMenuAnchor(
+                                                            null
+                                                        ),
+                                                }}
                                             >
-                                                Contracts
-                                            </Button>
-                                        </>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/toode"
+                                                    onClick={() =>
+                                                        setProductMenuAnchor(
+                                                            null
+                                                        )
+                                                    }
+                                                >
+                                                    List
+                                                </MenuItem>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/toode/create"
+                                                    onClick={() =>
+                                                        setProductMenuAnchor(
+                                                            null
+                                                        )
+                                                    }
+                                                >
+                                                    Add
+                                                </MenuItem>
+                                            </Menu>
+                                        </Box>
                                     )}
+
+                                    {(user?.roleId === 1 ||
+                                        user?.roleId === 2) && (
+                                        <Button
+                                            color="inherit"
+                                            component={Link}
+                                            to="/leping"
+                                        >
+                                            Contracts
+                                        </Button>
+                                    )}
+
                                     {user?.roleId === 1 && (
                                         <Box>
                                             <Button
@@ -291,6 +348,7 @@ export default function Navbar() {
                                     )}
                                 </Stack>
                             </Box>
+
                             <Stack
                                 direction="row"
                                 spacing={2}

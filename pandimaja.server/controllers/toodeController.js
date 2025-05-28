@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 const models = initModels(sequelize);
 
 exports.createToode = async (req, res) => {
-    const { nimetus, kirjaldus, status_id, hind } = req.body;
+    const { nimetus, kirjeldus, status_id, hind } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : null;
 
     if (!nimetus || !status_id || hind === undefined) {
@@ -17,7 +17,7 @@ exports.createToode = async (req, res) => {
     try {
         const newToode = await models.toode.create({
             nimetus,
-            kirjaldus,
+            kirjeldus,
             status_id,
             image,
             hind,
@@ -63,33 +63,48 @@ exports.getAllTooded = async (req, res) => {
 };
 
 exports.searchTooded = async (req, res) => {
-    const { q, status_id, minPrice, maxPrice } = req.query;
-
-    const whereClause = {};
-
-    if (q && typeof q === "string") {
-        whereClause[Op.or] = [
-            { nimetus: { [Op.iLike]: `%${q.trim()}%` } },
-            { kirjeldus: { [Op.iLike]: `%${q.trim()}%` } },
-        ];
-    }
-
-    if (status_id) {
-        whereClause.status_id = status_id;
-    }
-
-    if (minPrice || maxPrice) {
-        whereClause.hind = {};
-        if (minPrice) whereClause.hind[Op.gte] = Number(minPrice);
-        if (maxPrice) whereClause.hind[Op.lte] = Number(maxPrice);
-    }
+    const { nimetus, kirjeldus, status_id } = req.query;
 
     try {
-        const result = await models.toode.findAll({ where: whereClause });
-        res.status(200).json(result);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Error while searching products." });
+        const filters = [];
+
+        if (nimetus) {
+            filters.push({
+                nimetus: { [Op.iLike]: `%${nimetus}%` },
+            });
+        }
+
+        if (kirjeldus) {
+            filters.push({
+                kirjeldus: { [Op.iLike]: `%${kirjeldus}%` },
+            });
+        }
+
+        if (status_id) {
+            filters.push({
+                status_id,
+            });
+        }
+
+        if (filters.length === 0) {
+            return res.status(400).json({
+                message:
+                    "Please provide at least one search parameter (nimetus, kirjeldus, status_id).",
+            });
+        }
+
+        const tooded = await models.toode.findAll({
+            where: {
+                [Op.or]: filters,
+            },
+        });
+
+        res.status(200).json(tooded);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Server error while searching for products.",
+        });
     }
 };
 
@@ -110,8 +125,13 @@ exports.getToodeById = async (req, res) => {
 
 exports.updateToode = async (req, res) => {
     const { id } = req.params;
-    const { nimetus, kirjaldus, status_id, hind } = req.body;
+    const isMultipart = req.is("multipart/form-data");
     const image = req.file ? `/uploads/${req.file.filename}` : null;
+
+    // Поддержка JSON и multipart
+    const { nimetus, kirjeldus, status_id, hind } = isMultipart
+        ? req.body
+        : req.body;
 
     try {
         const toode = await models.toode.findByPk(id);
@@ -119,11 +139,11 @@ exports.updateToode = async (req, res) => {
             return res.status(404).json({ message: "Product not found." });
         }
 
-        if (nimetus) toode.nimetus = nimetus;
-        if (kirjaldus) toode.kirjaldus = kirjaldus;
-        if (status_id) toode.status_id = status_id;
+        if (nimetus !== undefined) toode.nimetus = nimetus;
+        if (kirjeldus !== undefined) toode.kirjeldus = kirjeldus;
+        if (status_id !== undefined) toode.status_id = status_id;
         if (hind !== undefined) toode.hind = hind;
-        if (image) toode.image = image; // Только если файл отправлен
+        if (image) toode.image = image;
 
         await toode.save();
 
@@ -132,7 +152,7 @@ exports.updateToode = async (req, res) => {
             toode,
         });
     } catch (error) {
-        console.error(error);
+        console.error("Update error:", error);
         res.status(500).json({ message: "Error updating product." });
     }
 };
@@ -201,52 +221,6 @@ exports.getToodedLaos = async (req, res) => {
         console.error("Error:", err);
         res.status(500).json({
             message: "Error fetching products with status 'Laos'.",
-        });
-    }
-};
-const { Op } = require("sequelize");
-
-exports.searchTooded = async (req, res) => {
-    const { nimetus, kirjeldus, status_id } = req.query;
-    const searchTerm = nimetus || kirjeldus || status_id;
-
-    try {
-        if (!searchTerm) {
-            return res.status(400).json({
-                message:
-                    "Please provide a search parameter (nimetus, kirjeldus, or status_id).",
-            });
-        }
-
-        const whereClause = {
-            [Op.or]: [],
-        };
-
-        if (nimetus) {
-            whereClause[Op.or].push({
-                nimetus: { [Op.iLike]: `%${nimetus}%` },
-            });
-        }
-
-        if (kirjeldus) {
-            whereClause[Op.or].push({
-                kirjeldus: { [Op.iLike]: `%${kirjeldus}%` },
-            });
-        }
-
-        if (status_id) {
-            whereClause[Op.or].push({ status_id });
-        }
-
-        const tooded = await models.toode.findAll({
-            where: whereClause,
-        });
-
-        res.status(200).json(tooded);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Server error while searching for products.",
         });
     }
 };
