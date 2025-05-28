@@ -204,3 +204,49 @@ exports.getToodedLaos = async (req, res) => {
         });
     }
 };
+const { Op } = require("sequelize");
+
+exports.searchTooded = async (req, res) => {
+    const { nimetus, kirjeldus, status_id } = req.query;
+    const searchTerm = nimetus || kirjeldus || status_id;
+
+    try {
+        if (!searchTerm) {
+            return res.status(400).json({
+                message:
+                    "Please provide a search parameter (nimetus, kirjeldus, or status_id).",
+            });
+        }
+
+        const whereClause = {
+            [Op.or]: [],
+        };
+
+        if (nimetus) {
+            whereClause[Op.or].push({
+                nimetus: { [Op.iLike]: `%${nimetus}%` },
+            });
+        }
+
+        if (kirjeldus) {
+            whereClause[Op.or].push({
+                kirjeldus: { [Op.iLike]: `%${kirjeldus}%` },
+            });
+        }
+
+        if (status_id) {
+            whereClause[Op.or].push({ status_id });
+        }
+
+        const tooded = await models.toode.findAll({
+            where: whereClause,
+        });
+
+        res.status(200).json(tooded);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Server error while searching for products.",
+        });
+    }
+};

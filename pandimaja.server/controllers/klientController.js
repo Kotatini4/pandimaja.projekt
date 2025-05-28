@@ -11,6 +11,51 @@ exports.createKlient = async (req, res) => {
             .json({ message: "Name, surname and kood are required." });
     }
 
+    // Валидация kood
+    if (!/^[1-6][0-9]{10}$/.test(kood)) {
+        return res
+            .status(400)
+            .json({ message: "Kood must be 11 digits and start with 1–6." });
+    }
+
+    const genderCode = parseInt(kood[0]);
+    const yearPart = kood.substring(1, 3);
+    const month = parseInt(kood.substring(3, 5));
+    const day = parseInt(kood.substring(5, 7));
+
+    let year;
+    if (genderCode === 1 || genderCode === 2) year = 1800 + parseInt(yearPart);
+    else if (genderCode === 3 || genderCode === 4)
+        year = 1900 + parseInt(yearPart);
+    else if (genderCode === 5 || genderCode === 6)
+        year = 2000 + parseInt(yearPart);
+    else {
+        return res
+            .status(400)
+            .json({ message: "Invalid gender/century code in kood." });
+    }
+
+    const dateValid = !isNaN(
+        Date.parse(
+            `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(
+                2,
+                "0"
+            )}`
+        )
+    );
+    if (!dateValid) {
+        return res.status(400).json({ message: "Invalid birthdate in kood." });
+    }
+
+    // Проверка телефона
+    const cleanTel = !tel || tel.trim() === "" ? null : tel.trim();
+    if (cleanTel && !/^\+?[0-9]+$/.test(cleanTel)) {
+        return res.status(400).json({
+            message:
+                "Phone number must contain only digits and optional leading +.",
+        });
+    }
+
     try {
         const existingKlient = await models.klient.findOne({ where: { kood } });
         if (existingKlient) {
@@ -23,8 +68,8 @@ exports.createKlient = async (req, res) => {
             nimi,
             perekonnanimi,
             kood,
-            tel,
-            aadres,
+            tel: cleanTel,
+            aadres: aadres?.trim() || null,
             status: status || "ACTIVE",
         });
 
@@ -116,7 +161,7 @@ exports.getKlientById = async (req, res) => {
 
 exports.updateKlient = async (req, res) => {
     const { id } = req.params;
-    const { nimi, perekonnanimi, tel, aadres, status } = req.body;
+    const { nimi, perekonnanimi, tel, aadres, status, kood } = req.body;
 
     try {
         const klient = await models.klient.findByPk(id);
@@ -124,10 +169,67 @@ exports.updateKlient = async (req, res) => {
             return res.status(404).json({ message: "Client not found." });
         }
 
+        if (kood) {
+            if (!/^[1-6][0-9]{10}$/.test(kood)) {
+                return res.status(400).json({
+                    message: "Kood must be 11 digits and start with 1–6.",
+                });
+            }
+
+            const genderCode = parseInt(kood[0]);
+            const yearPart = kood.substring(1, 3);
+            const month = parseInt(kood.substring(3, 5));
+            const day = parseInt(kood.substring(5, 7));
+
+            let year;
+            if (genderCode === 1 || genderCode === 2)
+                year = 1800 + parseInt(yearPart);
+            else if (genderCode === 3 || genderCode === 4)
+                year = 1900 + parseInt(yearPart);
+            else if (genderCode === 5 || genderCode === 6)
+                year = 2000 + parseInt(yearPart);
+            else {
+                return res
+                    .status(400)
+                    .json({ message: "Invalid gender/century code in kood." });
+            }
+
+            const dateValid = !isNaN(
+                Date.parse(
+                    `${year}-${String(month).padStart(2, "0")}-${String(
+                        day
+                    ).padStart(2, "0")}`
+                )
+            );
+            if (!dateValid) {
+                return res
+                    .status(400)
+                    .json({ message: "Invalid birthdate in kood." });
+            }
+
+            const existing = await models.klient.findOne({ where: { kood } });
+            if (existing && existing.klient_id !== klient.klient_id) {
+                return res.status(400).json({
+                    message: "Another client with this kood already exists.",
+                });
+            }
+
+            klient.kood = kood;
+        }
+
         if (nimi) klient.nimi = nimi;
         if (perekonnanimi) klient.perekonnanimi = perekonnanimi;
-        if (tel) klient.tel = tel;
-        if (aadres) klient.aadres = aadres;
+
+        const cleanTel = !tel || tel.trim() === "" ? null : tel.trim();
+        if (cleanTel && !/^\+?[0-9]+$/.test(cleanTel)) {
+            return res.status(400).json({
+                message:
+                    "Phone number must contain only digits and optional leading +.",
+            });
+        }
+        klient.tel = cleanTel;
+
+        if (aadres !== undefined) klient.aadres = aadres?.trim() || null;
         if (status) klient.status = status;
 
         await klient.save();

@@ -20,24 +20,14 @@ import api from "../services/api";
 export default function Klient() {
     const [clients, setClients] = useState([]);
     const [form, setForm] = useState({});
-    const [toggledEditId, setToggledEditId] = useState(null);
+    const [editingId, setEditingId] = useState(null);
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(0);
     const [rowsPerPage] = useState(10);
     const [total, setTotal] = useState(0);
+    const statusOptions = ["active", "blocked"];
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (search.trim()) {
-                fetchClients();
-            } else {
-                setPage(0);
-                fetchClients();
-            }
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [search]);
-
+    // Загрузка списка
     const fetchClients = async () => {
         try {
             if (search.trim()) {
@@ -58,55 +48,73 @@ export default function Klient() {
                 setTotal(res.data.total);
             }
         } catch (err) {
-            console.error("Error fetching clients:", err);
-            setClients([]);
-            setTotal(0);
-            alert(err.response?.data?.message || "Failed to fetch clients");
+            console.error(err);
+            alert(err.response?.data?.message || "Error fetching clients");
         }
     };
-
-    useEffect(() => {
-        if (page === 0) {
-            fetchClients();
-        } else {
-            setPage(0);
-        }
-    }, [search]);
 
     useEffect(() => {
         fetchClients();
     }, [page]);
 
-    const handleSave = async () => {
-        try {
-            await api.patch(`/klient/${form.klient_id}`, form);
-            setToggledEditId(null);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setPage(0);
             fetchClients();
-        } catch (err) {
-            const msg = err.response?.data?.message || "Error saving client.";
-            alert(msg);
-        }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    // Начало редактирования
+    const handleEdit = (c) => {
+        setForm(c);
+        setEditingId(c.klient_id);
     };
 
+    // Удаление
     const handleDelete = async (id) => {
-        const confirm1 = window.confirm("Delete this client?");
-        if (!confirm1) return;
+        if (!window.confirm("Really delete this client?")) return;
         try {
             await api.delete(`/klient/${id}`);
             fetchClients();
+            alert("Client deleted");
         } catch (err) {
-            alert("Error deleting client");
+            console.error(err);
+            alert(err.response?.data?.message || "Error deleting client");
         }
     };
 
-    const handleEdit = (client) => {
-        setForm(client);
-        setToggledEditId(client.klient_id);
+    // Сохранение
+    const handleSave = async () => {
+        // Клиентская валидация
+        if (!form.nimi || !form.perekonnanimi || !form.kood) {
+            alert("First name, last name and kood are required.");
+            return;
+        }
+        if (!/^[1-6][0-9]{10}$/.test(form.kood)) {
+            alert("Kood must be 11 digits and start with 1–6.");
+            return;
+        }
+        if (form.tel && !/^\+?[0-9]+$/.test(form.tel)) {
+            alert("Phone must contain only digits and optional leading +.");
+            return;
+        }
+
+        try {
+            await api.patch(`/klient/${form.klient_id}`, form);
+            setEditingId(null);
+            fetchClients();
+            alert("Client updated successfully");
+        } catch (err) {
+            console.error(err);
+            // сообщение от сервера
+            alert(err.response?.data?.message || "Error saving client");
+        }
     };
 
-    const handleChangePage = (event, newPage) => setPage(newPage);
-
-    const statusOptions = ["active", "blocked"];
+    const handleChangePage = (e, newPage) => {
+        setPage(newPage);
+    };
 
     return (
         <Container sx={{ mt: 4 }}>
@@ -129,20 +137,22 @@ export default function Klient() {
                             <TableCell>ID</TableCell>
                             <TableCell>First Name</TableCell>
                             <TableCell>Last Name</TableCell>
-                            <TableCell>ID Code</TableCell>
+                            <TableCell>Kood</TableCell>
                             <TableCell>Phone</TableCell>
                             <TableCell>Address</TableCell>
                             <TableCell>Status</TableCell>
                             <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {clients.map((c) => (
                             <TableRow key={c.klient_id}>
                                 <TableCell>{c.klient_id}</TableCell>
                                 <TableCell>
-                                    {toggledEditId === c.klient_id ? (
+                                    {editingId === c.klient_id ? (
                                         <TextField
+                                            size="small"
                                             value={form.nimi || ""}
                                             onChange={(e) =>
                                                 setForm({
@@ -150,15 +160,15 @@ export default function Klient() {
                                                     nimi: e.target.value,
                                                 })
                                             }
-                                            size="small"
                                         />
                                     ) : (
                                         c.nimi
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {toggledEditId === c.klient_id ? (
+                                    {editingId === c.klient_id ? (
                                         <TextField
+                                            size="small"
                                             value={form.perekonnanimi || ""}
                                             onChange={(e) =>
                                                 setForm({
@@ -167,16 +177,31 @@ export default function Klient() {
                                                         e.target.value,
                                                 })
                                             }
-                                            size="small"
                                         />
                                     ) : (
                                         c.perekonnanimi
                                     )}
                                 </TableCell>
-                                <TableCell>{c.kood}</TableCell>
                                 <TableCell>
-                                    {toggledEditId === c.klient_id ? (
+                                    {editingId === c.klient_id ? (
                                         <TextField
+                                            size="small"
+                                            value={form.kood || ""}
+                                            onChange={(e) =>
+                                                setForm({
+                                                    ...form,
+                                                    kood: e.target.value,
+                                                })
+                                            }
+                                        />
+                                    ) : (
+                                        c.kood
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {editingId === c.klient_id ? (
+                                        <TextField
+                                            size="small"
                                             value={form.tel || ""}
                                             onChange={(e) =>
                                                 setForm({
@@ -184,15 +209,15 @@ export default function Klient() {
                                                     tel: e.target.value,
                                                 })
                                             }
-                                            size="small"
                                         />
                                     ) : (
                                         c.tel
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {toggledEditId === c.klient_id ? (
+                                    {editingId === c.klient_id ? (
                                         <TextField
+                                            size="small"
                                             value={form.aadres || ""}
                                             onChange={(e) =>
                                                 setForm({
@@ -200,15 +225,15 @@ export default function Klient() {
                                                     aadres: e.target.value,
                                                 })
                                             }
-                                            size="small"
                                         />
                                     ) : (
                                         c.aadres
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {toggledEditId === c.klient_id ? (
+                                    {editingId === c.klient_id ? (
                                         <Select
+                                            size="small"
                                             value={form.status || ""}
                                             onChange={(e) =>
                                                 setForm({
@@ -216,7 +241,6 @@ export default function Klient() {
                                                     status: e.target.value,
                                                 })
                                             }
-                                            size="small"
                                         >
                                             {statusOptions.map((s) => (
                                                 <MenuItem key={s} value={s}>
@@ -229,20 +253,20 @@ export default function Klient() {
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {toggledEditId === c.klient_id ? (
+                                    {editingId === c.klient_id ? (
                                         <Stack direction="column" spacing={1}>
                                             <Button
-                                                variant="contained"
                                                 size="small"
+                                                variant="contained"
                                                 onClick={handleSave}
                                             >
                                                 Save
                                             </Button>
                                             <Button
-                                                variant="outlined"
                                                 size="small"
+                                                variant="outlined"
                                                 onClick={() =>
-                                                    setToggledEditId(null)
+                                                    setEditingId(null)
                                                 }
                                             >
                                                 Cancel
@@ -251,15 +275,15 @@ export default function Klient() {
                                     ) : (
                                         <Stack direction="column" spacing={1}>
                                             <Button
-                                                variant="outlined"
                                                 size="small"
+                                                variant="outlined"
                                                 onClick={() => handleEdit(c)}
                                             >
                                                 Edit
                                             </Button>
                                             <Button
-                                                color="error"
                                                 size="small"
+                                                color="error"
                                                 onClick={() =>
                                                     handleDelete(c.klient_id)
                                                 }
@@ -273,6 +297,7 @@ export default function Klient() {
                         ))}
                     </TableBody>
                 </Table>
+
                 <TablePagination
                     component="div"
                     count={total}
