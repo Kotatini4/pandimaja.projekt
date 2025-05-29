@@ -26,7 +26,8 @@ export default function Navbar() {
     const [anchorEl, setAnchorEl] = useState(null);
     const [tootajaMenuAnchor, setTootajaMenuAnchor] = useState(null);
     const [klientMenuAnchor, setKlientMenuAnchor] = useState(null);
-    const [productMenuAnchor, setProductMenuAnchor] = useState(null); // добавлено
+    const [productMenuAnchor, setProductMenuAnchor] = useState(null);
+    const [lepingMenuAnchor, setLepingMenuAnchor] = useState(null);
 
     const open = Boolean(anchorEl);
 
@@ -295,13 +296,54 @@ export default function Navbar() {
 
                                     {(user?.roleId === 1 ||
                                         user?.roleId === 2) && (
-                                        <Button
-                                            color="inherit"
-                                            component={Link}
-                                            to="/leping"
-                                        >
-                                            Contracts
-                                        </Button>
+                                        <Box>
+                                            <Button
+                                                color="inherit"
+                                                onMouseEnter={(e) =>
+                                                    setLepingMenuAnchor(
+                                                        e.currentTarget
+                                                    )
+                                                }
+                                            >
+                                                Contracts
+                                            </Button>
+                                            <Menu
+                                                anchorEl={lepingMenuAnchor}
+                                                open={Boolean(lepingMenuAnchor)}
+                                                onClose={() =>
+                                                    setLepingMenuAnchor(null)
+                                                }
+                                                MenuListProps={{
+                                                    onMouseLeave: () =>
+                                                        setLepingMenuAnchor(
+                                                            null
+                                                        ),
+                                                }}
+                                            >
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/leping"
+                                                    onClick={() =>
+                                                        setLepingMenuAnchor(
+                                                            null
+                                                        )
+                                                    }
+                                                >
+                                                    List
+                                                </MenuItem>
+                                                <MenuItem
+                                                    component={Link}
+                                                    to="/leping/create"
+                                                    onClick={() =>
+                                                        setLepingMenuAnchor(
+                                                            null
+                                                        )
+                                                    }
+                                                >
+                                                    Add
+                                                </MenuItem>
+                                            </Menu>
+                                        </Box>
                                     )}
 
                                     {user?.roleId === 1 && (

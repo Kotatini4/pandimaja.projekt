@@ -17,6 +17,7 @@ import Tootaja from "./pages/Tootaja";
 import TootajaCreate from "./pages/TootajaCreate";
 import KlientCreate from "./pages/KlientCreate";
 import ToodeCreate from "./pages/ToodeCreate";
+import LepingCreate from "./pages/LepingCreate";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 function AppRoutes() {
@@ -29,6 +30,16 @@ function AppRoutes() {
             <Route path="/contacts" element={<Contacts />} />
 
             {/* Защищённые маршруты */}
+            <Route
+                path="/leping/create"
+                element={
+                    user && (user.roleId === 1 || user.roleId === 2) ? (
+                        <LepingCreate />
+                    ) : (
+                        <Navigate to="/login" />
+                    )
+                }
+            />
             <Route
                 path="/klient/create"
                 element={

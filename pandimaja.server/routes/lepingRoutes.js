@@ -2,20 +2,22 @@ const express = require("express");
 const router = express.Router();
 const lepingController = require("../controllers/lepingController");
 const { verifyToken, isUserOrAdmin } = require("../middleware/authMiddleware");
+
 /**
  * @swagger
  * tags:
  *   name: Leping
- *   description: API для управления договорами
+ *   description: Contract (Leping) management
  */
 
 /**
  * @swagger
  * /api/leping:
  *   post:
- *     summary: Создать новый договор (только для администратора или работника)
- *              если клиент имеет статус "blocked ", тогда создание договора невозможно
+ *     summary: Create a new contract
  *     tags: [Leping]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -26,6 +28,9 @@ const { verifyToken, isUserOrAdmin } = require("../middleware/authMiddleware");
  *               - klient_id
  *               - toode_id
  *               - tootaja_id
+ *               - pant_hind
+ *               - müügihind
+ *               - leping_type
  *             properties:
  *               klient_id:
  *                 type: integer
@@ -51,7 +56,11 @@ const { verifyToken, isUserOrAdmin } = require("../middleware/authMiddleware");
  *                 type: string
  *     responses:
  *       201:
- *         description: Договор создан
+ *         description: Contract successfully created
+ *       403:
+ *         description: Blocked client or forbidden
+ *       500:
+ *         description: Server error
  */
 router.post("/", verifyToken, isUserOrAdmin, lepingController.createLeping);
 
@@ -59,11 +68,15 @@ router.post("/", verifyToken, isUserOrAdmin, lepingController.createLeping);
  * @swagger
  * /api/leping:
  *   get:
- *     summary: Получить все договоры (только для администратора или работника)
+ *     summary: Get all contracts
  *     tags: [Leping]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Список договоров
+ *         description: List of contracts
+ *       500:
+ *         description: Error fetching contracts
  */
 router.get("/", verifyToken, isUserOrAdmin, lepingController.getAllLepingud);
 
@@ -71,8 +84,10 @@ router.get("/", verifyToken, isUserOrAdmin, lepingController.getAllLepingud);
  * @swagger
  * /api/leping/{id}:
  *   get:
- *     summary: Получить договор по ID (только для администратора или работника)
+ *     summary: Get contract by ID
  *     tags: [Leping]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -81,9 +96,9 @@ router.get("/", verifyToken, isUserOrAdmin, lepingController.getAllLepingud);
  *           type: integer
  *     responses:
  *       200:
- *         description: Информация о договоре
+ *         description: Contract found
  *       404:
- *         description: Договор не найден
+ *         description: Contract not found
  */
 router.get("/:id", verifyToken, isUserOrAdmin, lepingController.getLepingById);
 
@@ -91,8 +106,10 @@ router.get("/:id", verifyToken, isUserOrAdmin, lepingController.getLepingById);
  * @swagger
  * /api/leping/{id}:
  *   put:
- *     summary: Обновить договор (только для администратора или работника)
+ *     summary: Update contract
  *     tags: [Leping]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -105,18 +122,23 @@ router.get("/:id", verifyToken, isUserOrAdmin, lepingController.getLepingById);
  *           schema:
  *             type: object
  *             properties:
- *               date:
- *                 type: string
- *                 format: date
+ *               toode_id:
+ *                 type: integer
+ *               tootaja_id:
+ *                 type: integer
  *               pant_hind:
+ *                 type: number
+ *               valja_ostud_hind:
  *                 type: number
  *               müügihind:
  *                 type: number
+ *               leping_type:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Договор обновлён
+ *         description: Contract updated
  *       404:
- *         description: Договор не найден
+ *         description: Not found
  */
 router.put("/:id", verifyToken, isUserOrAdmin, lepingController.updateLeping);
 
@@ -124,8 +146,10 @@ router.put("/:id", verifyToken, isUserOrAdmin, lepingController.updateLeping);
  * @swagger
  * /api/leping/{id}:
  *   delete:
- *     summary: Удалить договор (только для администратора или работника)
+ *     summary: Delete contract
  *     tags: [Leping]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -134,9 +158,9 @@ router.put("/:id", verifyToken, isUserOrAdmin, lepingController.updateLeping);
  *           type: integer
  *     responses:
  *       204:
- *         description: Успешно удалён
+ *         description: Deleted successfully
  *       404:
- *         description: Договор не найден
+ *         description: Contract not found
  */
 router.delete(
     "/:id",
