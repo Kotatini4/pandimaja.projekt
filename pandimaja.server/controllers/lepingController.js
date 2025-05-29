@@ -3,32 +3,55 @@ const initModels = require("../models/init-models");
 
 const models = initModels(sequelize);
 
-// Create new leping
+// Create new contract
 exports.createLeping = async (req, res) => {
-    const { klient_id } = req.body;
+    const {
+        klient_id,
+        toode_id,
+        tootaja_id,
+        date,
+        date_valja_ostud,
+        pant_hind,
+        valja_ostud_hind,
+        ostuhind,
+        müügihind,
+        leping_type,
+    } = req.body;
 
     try {
         const klient = await models.klient.findByPk(klient_id);
-
-        if (!klient) {
+        if (!klient)
             return res.status(404).json({ message: "Client not found." });
-        }
 
         if (klient.status.toLowerCase() === "blocked") {
-            return res.status(403).json({
-                message: "Cannot create contract: client is blocked.",
-            });
+            return res
+                .status(403)
+                .json({
+                    message: "Cannot create contract: client is blocked.",
+                });
         }
 
-        const leping = await models.leping.create(req.body);
-        res.status(201).json(leping);
+        const newLeping = await models.leping.create({
+            klient_id,
+            toode_id,
+            tootaja_id,
+            date,
+            date_valja_ostud,
+            pant_hind,
+            valja_ostud_hind,
+            ostuhind,
+            müügihind,
+            leping_type,
+        });
+
+        res.status(201).json(newLeping);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error creating contract." });
     }
 };
 
-// Get all lepingud
+// Get all contracts
 exports.getAllLepingud = async (req, res) => {
     try {
         const lepingud = await models.leping.findAll({
@@ -54,13 +77,12 @@ exports.getAllLepingud = async (req, res) => {
     }
 };
 
-// Get leping by ID
+// Get contract by ID
 exports.getLepingById = async (req, res) => {
     try {
         const leping = await models.leping.findByPk(req.params.id);
         if (!leping)
             return res.status(404).json({ message: "Contract not found." });
-
         res.status(200).json(leping);
     } catch (err) {
         console.error(err);
@@ -68,7 +90,7 @@ exports.getLepingById = async (req, res) => {
     }
 };
 
-// Update leping
+// Update contract
 exports.updateLeping = async (req, res) => {
     try {
         const leping = await models.leping.findByPk(req.params.id);
@@ -86,7 +108,7 @@ exports.updateLeping = async (req, res) => {
     }
 };
 
-// Delete leping
+// Delete contract
 exports.deleteLeping = async (req, res) => {
     try {
         const leping = await models.leping.findByPk(req.params.id);

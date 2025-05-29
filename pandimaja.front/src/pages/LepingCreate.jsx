@@ -17,10 +17,14 @@ export default function LepingCreate() {
     const [form, setForm] = useState({
         klient_id: "",
         toode_id: "",
-        hind: "",
-        kuupaev: "",
-        kestvus: "",
         tootaja_id: "",
+        date: "",
+        date_valja_ostud: "",
+        pant_hind: "",
+        valja_ostud_hind: "",
+        ostuhind: "",
+        müügihind: "",
+        leping_type: "",
     });
 
     const navigate = useNavigate();
@@ -53,7 +57,7 @@ export default function LepingCreate() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await api.post("/leping", form);
+            await api.post("/leping", form);
             alert("Contract created!");
             navigate("/leping");
         } catch (err) {
@@ -61,6 +65,8 @@ export default function LepingCreate() {
             alert(err.response?.data?.message || "Failed to create contract.");
         }
     };
+
+    const lepingTypes = ["sale", "rent", "pawn"];
 
     return (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
@@ -76,18 +82,14 @@ export default function LepingCreate() {
                             name="klient_id"
                             value={form.klient_id}
                             onChange={handleChange}
-                            fullWidth
                             required
+                            fullWidth
                         >
-                            {Array.isArray(klients) &&
-                                klients.map((k) => (
-                                    <MenuItem
-                                        key={k.klient_id}
-                                        value={k.klient_id}
-                                    >
-                                        {k.nimi} {k.perekonnanimi} ({k.kood})
-                                    </MenuItem>
-                                ))}
+                            {klients.map((k) => (
+                                <MenuItem key={k.klient_id} value={k.klient_id}>
+                                    {k.nimi} {k.perekonnanimi} ({k.kood})
+                                </MenuItem>
+                            ))}
                         </TextField>
 
                         <TextField
@@ -96,59 +98,100 @@ export default function LepingCreate() {
                             name="toode_id"
                             value={form.toode_id}
                             onChange={handleChange}
-                            fullWidth
                             required
+                            fullWidth
                         >
-                            {Array.isArray(tooded) &&
-                                tooded.map((t) => (
-                                    <MenuItem
-                                        key={t.toode_id}
-                                        value={t.toode_id}
-                                    >
-                                        {t.nimetus}
-                                    </MenuItem>
-                                ))}
+                            {tooded.map((t) => (
+                                <MenuItem key={t.toode_id} value={t.toode_id}>
+                                    {t.nimetus}
+                                </MenuItem>
+                            ))}
                         </TextField>
 
-                        <TextField
-                            label="Price (€)"
-                            name="hind"
-                            type="number"
-                            value={form.hind}
-                            onChange={handleChange}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Date"
-                            name="kuupaev"
-                            type="date"
-                            value={form.kuupaev}
-                            onChange={handleChange}
-                            fullWidth
-                            InputLabelProps={{ shrink: true }}
-                        />
-                        <TextField
-                            label="Duration (months)"
-                            name="kestvus"
-                            type="number"
-                            value={form.kestvus}
-                            onChange={handleChange}
-                            fullWidth
-                        />
                         <TextField
                             label="Employee ID"
                             name="tootaja_id"
                             type="number"
                             value={form.tootaja_id}
                             onChange={handleChange}
+                            required
                             fullWidth
                         />
 
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
+                        <TextField
+                            label="Contract Date"
+                            name="date"
+                            type="date"
+                            value={form.date}
+                            onChange={handleChange}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                        />
+
+                        <TextField
+                            label="Buyback Date"
+                            name="date_valja_ostud"
+                            type="date"
+                            value={form.date_valja_ostud}
+                            onChange={handleChange}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                        />
+
+                        <TextField
+                            label="Pawn Value (€)"
+                            name="pant_hind"
+                            type="number"
+                            value={form.pant_hind}
+                            onChange={handleChange}
+                            fullWidth
+                        />
+
+                        <TextField
+                            label="Buyback Value (€)"
+                            name="valja_ostud_hind"
+                            type="number"
+                            value={form.valja_ostud_hind}
+                            onChange={handleChange}
+                            fullWidth
+                        />
+
+                        <TextField
+                            label="Purchase Price (€)"
+                            name="ostuhind"
+                            type="number"
+                            value={form.ostuhind}
+                            onChange={handleChange}
+                            fullWidth
+                        />
+
+                        <TextField
+                            label="Selling Price (€)"
+                            name="müügihind"
+                            type="number"
+                            value={form.müügihind}
+                            onChange={handleChange}
+                            fullWidth
+                        />
+
+                        <TextField
+                            select
+                            label="Contract Type"
+                            name="leping_type"
+                            value={form.leping_type}
+                            onChange={handleChange}
+                            fullWidth
+                            required
                         >
+                            {lepingTypes.map((type) => (
+                                <MenuItem key={type} value={type}>
+                                    {type}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+
+                        <Button type="submit" variant="contained">
                             Submit
                         </Button>
                     </Stack>
