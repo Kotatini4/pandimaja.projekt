@@ -125,13 +125,8 @@ exports.getToodeById = async (req, res) => {
 
 exports.updateToode = async (req, res) => {
     const { id } = req.params;
-    const isMultipart = req.is("multipart/form-data");
+    const { nimetus, kirjeldus, status_id, hind } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : null;
-
-    // Поддержка JSON и multipart
-    const { nimetus, kirjeldus, status_id, hind } = isMultipart
-        ? req.body
-        : req.body;
 
     try {
         const toode = await models.toode.findByPk(id);
@@ -152,7 +147,7 @@ exports.updateToode = async (req, res) => {
             toode,
         });
     } catch (error) {
-        console.error("Update error:", error);
+        console.error(error);
         res.status(500).json({ message: "Error updating product." });
     }
 };

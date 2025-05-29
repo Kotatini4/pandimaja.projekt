@@ -83,9 +83,25 @@ export default function Toode() {
         setToggledEditId(product.toode_id);
     };
 
+    const handleFileChange = (e) => {
+        setForm({ ...form, image: e.target.files[0] });
+    };
+
     const handleSave = async () => {
         try {
-            await api.patch(`/toode/${form.toode_id}`, form);
+            const data = new FormData();
+            data.append("nimetus", form.nimetus);
+            data.append("kirjeldus", form.kirjeldus);
+            data.append("hind", form.hind);
+            data.append("status_id", form.status_id);
+            if (form.image && typeof form.image !== "string") {
+                data.append("image", form.image);
+            }
+
+            await api.patch(`/toode/${form.toode_id}`, data, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
             setToggledEditId(null);
             fetchProducts();
         } catch (err) {
@@ -235,32 +251,45 @@ export default function Toode() {
                                     )}
                                 </TableCell>
                                 <TableCell>
-                                    {p.image ? (
+                                    {toggledEditId === p.toode_id ? (
+                                        <Stack spacing={1}>
+                                            <Button
+                                                variant="outlined"
+                                                component="label"
+                                                size="small"
+                                            >
+                                                Upload Image
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    hidden
+                                                    onChange={handleFileChange}
+                                                />
+                                            </Button>
+                                            {form.image &&
+                                                typeof form.image ===
+                                                    "object" && (
+                                                    <Typography variant="body2">
+                                                        {form.image.name}
+                                                    </Typography>
+                                                )}
+                                        </Stack>
+                                    ) : p.image ? (
                                         <a
                                             href={`http://localhost:3000${p.image}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                window.open(
-                                                    `http://localhost:3000${p.image}`,
-                                                    "popup",
-                                                    "width=600,height=400"
-                                                );
-                                            }}
                                         >
                                             <img
                                                 src={`http://localhost:3000${p.image}`}
                                                 alt="product"
                                                 width={50}
-                                                style={{ cursor: "pointer" }}
                                             />
                                         </a>
                                     ) : (
                                         "No image"
                                     )}
                                 </TableCell>
-
                                 <TableCell>
                                     {toggledEditId === p.toode_id ? (
                                         <Stack direction="column" spacing={1}>

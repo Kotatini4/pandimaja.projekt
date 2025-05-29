@@ -63,17 +63,21 @@ export default function Home() {
                 <Typography variant="h4">Товары в продаже</Typography>
 
                 <FormControl size="small" sx={{ minWidth: 200, ml: "auto" }}>
-                    <InputLabel>Сортировать</InputLabel>
+                    <InputLabel>Sort</InputLabel>
                     <Select
                         value={sortBy}
-                        label="Сортировать"
+                        label="Sort"
                         onChange={(e) => setSortBy(e.target.value)}
                     >
-                        <MenuItem value="">Без сортировки</MenuItem>
-                        <MenuItem value="name_asc">Название: A–Я</MenuItem>
-                        <MenuItem value="name_desc">Название: Я–A</MenuItem>
-                        <MenuItem value="price_asc">Цена: ↑</MenuItem>
-                        <MenuItem value="price_desc">Цена: ↓</MenuItem>
+                        <MenuItem value="">No sorting</MenuItem>
+                        <MenuItem value="name_asc">Name: A–Z</MenuItem>
+                        <MenuItem value="name_desc">Name: Z–A</MenuItem>
+                        <MenuItem value="price_asc">
+                            Price: Low to High
+                        </MenuItem>
+                        <MenuItem value="price_desc">
+                            Price: High to Low
+                        </MenuItem>
                     </Select>
                 </FormControl>
             </Stack>
@@ -114,9 +118,6 @@ export default function Home() {
                                     {product.hind}
                                 </Typography>
                             </CardContent>
-                            <CardActions>
-                                <Button size="small">ПОДРОБНЕЕ</Button>
-                            </CardActions>
                         </Card>
                     </Grid>
                 ))}
