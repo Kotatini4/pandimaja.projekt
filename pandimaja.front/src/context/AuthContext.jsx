@@ -5,41 +5,46 @@ export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
+    const [token, setToken] = useState(null); // 👈 добавляем token
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
+        const storedToken = localStorage.getItem("token");
+        if (storedToken) {
             try {
-                const decoded = jwtDecode(token);
-
+                const decoded = jwtDecode(storedToken);
                 const now = Date.now() / 1000;
                 if (decoded.exp && decoded.exp < now) {
                     console.log("Token expired");
                     localStorage.removeItem("token");
                     setUser(null);
-                    return;
+                    setToken(null);
+                } else {
+                    setUser({
+                        roleId: decoded.roleId,
+                        kood: decoded.kood,
+                        name: decoded.name,
+                    });
+                    setToken(storedToken); // 👈 сохраняем token
                 }
-
-                setUser({
-                    roleId: decoded.roleId,
-                    kood: decoded.kood,
-                    name: decoded.name,
-                });
             } catch (e) {
                 console.error("Ошибка декодирования токена", e);
                 localStorage.removeItem("token");
                 setUser(null);
+                setToken(null);
             }
         }
+        setLoading(false);
     }, []);
 
     const logout = () => {
         localStorage.removeItem("token");
         setUser(null);
+        setToken(null);
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, logout }}>
+        <AuthContext.Provider value={{ user, setUser, token, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

@@ -13,6 +13,13 @@ import {
     FormControl,
     InputLabel,
     Button,
+    TextField,
+    Box,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
 } from "@mui/material";
 import api from "../services/api";
 import { Link } from "react-router-dom";
@@ -21,18 +28,58 @@ export default function Leping() {
     const [contracts, setContracts] = useState([]);
     const [sortBy, setSortBy] = useState("");
 
+    const [searchParams, setSearchParams] = useState({
+        klient_nimi: "",
+        klient_perekonnanimi: "",
+        klient_kood: "",
+        leping_type: "",
+    });
+
+    const [openDialog, setOpenDialog] = useState(false);
+    const [selectedToodeId, setSelectedToodeId] = useState(null);
+
     useEffect(() => {
+        fetchContracts();
+    }, []);
+
+    const fetchContracts = () => {
         api.get("/leping")
             .then((res) => setContracts(res.data))
             .catch((err) => console.error("Error fetching contracts:", err));
-    }, []);
+    };
+
+    const handleSearch = () => {
+        const params = new URLSearchParams();
+        Object.entries(searchParams).forEach(([key, value]) => {
+            if (value.trim()) params.append(key, value.trim());
+        });
+
+        api.get(`/leping/search?${params.toString()}`)
+            .then((res) => setContracts(res.data))
+            .catch((err) => console.error("Error searching contracts:", err));
+    };
+
+    const confirmBuyout = (toodeId) => {
+        setSelectedToodeId(toodeId);
+        setOpenDialog(true);
+    };
+
+    const handleBuyout = async () => {
+        try {
+            await api.post(`/toode/${selectedToodeId}/buyout`);
+            fetchContracts();
+        } catch (error) {
+            console.error("Buyout error:", error);
+            alert("Failed to buy out product.");
+        } finally {
+            setOpenDialog(false);
+            setSelectedToodeId(null);
+        }
+    };
 
     const sorted = [...contracts].sort((a, b) => {
-        if (sortBy === "date") {
-            return new Date(b.date) - new Date(a.date);
-        } else if (sortBy === "pant_hind") {
-            return b.pant_hind - a.pant_hind;
-        }
+        if (sortBy === "date") return new Date(b.date) - new Date(a.date);
+        if (sortBy === "pant_hind") return b.pant_hind - a.pant_hind;
         return 0;
     });
 
@@ -41,6 +88,48 @@ export default function Leping() {
             <Typography variant="h4" gutterBottom>
                 Contracts
             </Typography>
+
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+                <TextField
+                    label="Client First Name"
+                    value={searchParams.klient_nimi}
+                    onChange={(e) =>
+                        setSearchParams({ ...searchParams, klient_nimi: e.target.value })
+                    }
+                />
+                <TextField
+                    label="Client Last Name"
+                    value={searchParams.klient_perekonnanimi}
+                    onChange={(e) =>
+                        setSearchParams({ ...searchParams, klient_perekonnanimi: e.target.value })
+                    }
+                />
+                <TextField
+                    label="ID Code"
+                    value={searchParams.klient_kood}
+                    onChange={(e) =>
+                        setSearchParams({ ...searchParams, klient_kood: e.target.value })
+                    }
+                />
+                <FormControl sx={{ minWidth: 150 }}>
+                    <InputLabel>Contract Type</InputLabel>
+                    <Select
+                        value={searchParams.leping_type}
+                        label="Contract Type"
+                        onChange={(e) =>
+                            setSearchParams({ ...searchParams, leping_type: e.target.value })
+                        }
+                    >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="pant">pant</MenuItem>
+                        <MenuItem value="ost">ost</MenuItem>
+                        <MenuItem value="müük">müük</MenuItem>
+                        <MenuItem value="väljaost">väljaost</MenuItem>
+                    </Select>
+                </FormControl>
+                <Button variant="contained" onClick={handleSearch}>Search</Button>
+                <Button variant="outlined" onClick={fetchContracts}>Reset</Button>
+            </Box>
 
             <FormControl sx={{ minWidth: 200, mb: 2 }}>
                 <InputLabel>Sort By</InputLabel>
@@ -61,9 +150,11 @@ export default function Leping() {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Client</TableCell>
+                            <TableCell>Isikukood</TableCell>
                             <TableCell>Product</TableCell>
                             <TableCell>Employee</TableCell>
                             <TableCell>Date</TableCell>
+                            <TableCell>Date Valja Ostud</TableCell>
                             <TableCell>Deposit</TableCell>
                             <TableCell>Buyout</TableCell>
                             <TableCell>Type</TableCell>
@@ -73,13 +164,41 @@ export default function Leping() {
                         {sorted.map((c) => (
                             <TableRow key={c.leping_id}>
                                 <TableCell>{c.leping_id}</TableCell>
-                                <TableCell>{c.klient_id}</TableCell>
-                                <TableCell>{c.toode_id}</TableCell>
-                                <TableCell>{c.tootaja_id}</TableCell>
-                                <TableCell>{c.date}</TableCell>
-                                <TableCell>{c.pant_hind}</TableCell>
-                                <TableCell>{c.valja_ostud_hind}</TableCell>
-                                <TableCell>{c.leping_type}</TableCell>
+                                <TableCell>
+                                    {c.klient ? `${c.klient.nimi} ${c.klient.perekonnanimi}` : "—"}
+                                </TableCell>
+                                <TableCell>{c.klient?.kood || "—"}</TableCell>
+                                <TableCell>{c.toode?.nimetus || "—"}</TableCell>
+                                <TableCell>
+                                    {c.tootaja
+                                        ? `${c.tootaja.nimi} ${c.tootaja.perekonnanimi}`
+                                        : "—"}
+                                </TableCell>
+                                <TableCell>{c.date || "—"}</TableCell>
+                                <TableCell>{c.date_valja_ostud || "—"}</TableCell>
+                                <TableCell>{c.pant_hind || "—"}</TableCell>
+                                <TableCell>{c.valja_ostud_hind || "—"}</TableCell>
+                                <TableCell>
+                                    {c.leping_type}
+                                    {c.leping_type === "pant" && c.toode_id && (
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            sx={{ ml: 1 }}
+                                            onClick={() => confirmBuyout(c.toode_id)}
+                                        >
+                                            Buy Out Product
+                                        </Button>
+                                    )}
+
+                                    <Button
+                                        color="inherit"
+                                        component={Link}
+                                        to={`/leping/print/${c.leping_id}`}
+                                    >
+                                        Print Contract
+                                    </Button>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -95,6 +214,22 @@ export default function Leping() {
             >
                 Create Contract
             </Button>
+
+            {/* Confirm Dialog */}
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                <DialogTitle>Confirm Buyout</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to mark this product as bought out?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+                    <Button onClick={handleBuyout} variant="contained" color="primary">
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 }

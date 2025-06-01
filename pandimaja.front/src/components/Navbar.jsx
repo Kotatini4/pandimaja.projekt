@@ -197,7 +197,6 @@ export default function Navbar() {
                                     >
                                         Contacts
                                     </Button>
-
                                     {(user?.roleId === 1 ||
                                         user?.roleId === 2) && (
                                         <Box>

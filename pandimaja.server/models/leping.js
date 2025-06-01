@@ -51,7 +51,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DECIMAL,
       allowNull: true
     },
-    'müügihind': {
+    'muugihind': {
       type: DataTypes.DECIMAL,
       allowNull: true
     },

@@ -65,9 +65,11 @@ router.post("/register", verifyToken, isAdmin, authController.register);
  *               kood:
  *                 type: string
  *                 description: Личный код пользователя
+ *                 example: "38303123718"
  *               pass:
  *                 type: string
  *                 description: Пароль пользователя
+ *                 example: "admin123"
  *     responses:
  *       200:
  *         description: Успешный логин, возвращает токен
@@ -82,6 +84,7 @@ router.post("/register", verifyToken, isAdmin, authController.register);
  *       400:
  *         description: Неверные данные логина
  */
+
 // Роут для логирования
 router.post("/login", authController.login);
 

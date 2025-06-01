@@ -2,7 +2,7 @@ const sequelize = require("../config/database");
 const initModels = require("../models/init-models");
 const { Op } = require("sequelize");
 
-const models = initModels(sequelize);
+const models = initModels(sequelize); // импорт всех моделей
 
 exports.createToode = async (req, res) => {
     const { nimetus, kirjeldus, status_id, hind } = req.body;
@@ -30,14 +30,46 @@ exports.createToode = async (req, res) => {
     }
 };
 
+exports.autocompleteTooded = async (req, res) => {
+    const { search, type } = req.query;
+
+    if (!search) {
+        return res.status(400).json({ message: "Search query is required." });
+    }
+
+    try {
+        const whereCondition = {
+            [Op.or]: [
+                { toode_id: isNaN(search) ? -1 : parseInt(search) },
+                { nimetus: { [Op.iLike]: `%${search}%` } },
+                { kirjeldus: { [Op.iLike]: `%${search}%` } },
+            ],
+        };
+
+        if (type === "pant" || type === "ost") {
+            whereCondition.status_id = 5;
+        } else if (type === "müük") {
+            whereCondition.status_id = 1;
+        }
+
+        const results = await models.toode.findAll({
+            where: whereCondition,
+            limit: 10,
+        });
+
+        res.json(results);
+    } catch (err) {
+        console.error("Autocomplete search error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 exports.getAllTooded = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
     if (page <= 0 || limit <= 0) {
-        return res
-            .status(400)
-            .json({ message: "Invalid pagination parameters." });
+        return res.status(400).json({ message: "Invalid pagination parameters." });
     }
 
     const offset = (page - 1) * limit;
@@ -69,27 +101,20 @@ exports.searchTooded = async (req, res) => {
         const filters = [];
 
         if (nimetus) {
-            filters.push({
-                nimetus: { [Op.iLike]: `%${nimetus}%` },
-            });
+            filters.push({ nimetus: { [Op.iLike]: `%${nimetus}%` } });
         }
 
         if (kirjeldus) {
-            filters.push({
-                kirjeldus: { [Op.iLike]: `%${kirjeldus}%` },
-            });
+            filters.push({ kirjeldus: { [Op.iLike]: `%${kirjeldus}%` } });
         }
 
         if (status_id) {
-            filters.push({
-                status_id,
-            });
+            filters.push({ status_id });
         }
 
         if (filters.length === 0) {
             return res.status(400).json({
-                message:
-                    "Please provide at least one search parameter (nimetus, kirjeldus, status_id).",
+                message: "Please provide at least one search parameter (nimetus, kirjeldus, status_id).",
             });
         }
 
@@ -102,9 +127,7 @@ exports.searchTooded = async (req, res) => {
         res.status(200).json(tooded);
     } catch (error) {
         console.error(error);
-        res.status(500).json({
-            message: "Server error while searching for products.",
-        });
+        res.status(500).json({ message: "Server error while searching for products." });
     }
 };
 
@@ -186,9 +209,7 @@ exports.getToodedByStatus = async (req, res) => {
         });
 
         if (!tooded || tooded.length === 0) {
-            return res
-                .status(404)
-                .json({ message: "No products found with this status." });
+            return res.status(404).json({ message: "No products found with this status." });
         }
 
         res.status(200).json(tooded);
@@ -214,8 +235,42 @@ exports.getToodedLaos = async (req, res) => {
         res.status(200).json(tooded);
     } catch (err) {
         console.error("Error:", err);
-        res.status(500).json({
-            message: "Error fetching products with status 'Laos'.",
+        res.status(500).json({ message: "Error fetching products with status 'Laos'." });
+    }
+};
+
+exports.buyoutToode = async (req, res) => {
+    const { id } = req.params;
+    const transaction = await sequelize.transaction();
+
+    try {
+        const foundToode = await models.toode.findByPk(id, { transaction });
+        if (!foundToode) {
+            await transaction.rollback();
+            return res.status(404).json({ message: "Product not found." });
+        }
+
+        // Статус 4 — выкуплен
+        foundToode.status_id = 4;
+        await foundToode.save({ transaction });
+
+        const foundLeping = await models.leping.findOne({
+            where: { toode_id: id },
+            order: [["leping_id", "DESC"]],
+            transaction,
         });
+
+        if (foundLeping) {
+            foundLeping.date_valja_ostud = new Date();
+            foundLeping.leping_type = "väljaost";
+            await foundLeping.save({ transaction });
+        }
+
+        await transaction.commit();
+        res.status(200).json({ message: "Product marked as bought out and contract updated." });
+    } catch (error) {
+        await transaction.rollback();
+        console.error("Buyout error:", error);
+        res.status(500).json({ message: "Server error while buying out product." });
     }
 };

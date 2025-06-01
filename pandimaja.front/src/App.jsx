@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import Klient from "./pages/Klient";
 import Toode from "./pages/Toode";
 import Leping from "./pages/Leping";
+import LepingPrint from "./pages/LepingPrint";
 import Login from "./pages/Login";
 import Contacts from "./pages/Contacts";
 import Tootaja from "./pages/Tootaja";
@@ -21,8 +22,8 @@ import LepingCreate from "./pages/LepingCreate";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 function AppRoutes() {
-    const { user } = useAuth();
-
+    const { user, loading } = useAuth();
+    if (loading) return <div>Loading...</div>;
     return (
         <Routes>
             <Route path="/" element={<Home />} />
@@ -30,6 +31,16 @@ function AppRoutes() {
             <Route path="/contacts" element={<Contacts />} />
 
             {/* Защищённые маршруты */}
+            <Route
+                path="/leping/print/:id"
+                element={
+                    user && (user.roleId === 1 || user.roleId === 2) ? (
+                        <LepingPrint />
+                    ) : (
+                        <Navigate to="/login" />
+                    )
+                }
+            />
             <Route
                 path="/leping/create"
                 element={

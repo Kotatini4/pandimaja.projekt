@@ -6,6 +6,71 @@ const { verifyToken, isUserOrAdmin } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
+ * /api/leping/print/{id}:
+ *   get:
+ *     summary: Get printable version of contract by ID (no auth)
+ *     tags: [Leping]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: HTML printable contract
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *       404:
+ *         description: Not found
+ */
+router.get("/print/:id", lepingController.getPrintableLeping);
+
+
+/**
+ * @swagger
+ * /api/leping/search:
+ *   get:
+ *     summary: Search contracts by client name, ID code, or contract type
+ *     tags: [Leping]
+ *     parameters:
+ *       - name: klient_nimi
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: klient_perekonnanimi
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: klient_kood
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: leping_type
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [pant, ost, väljaost, müük]
+ *     responses:
+ *       200:
+ *         description: Filtered list of contracts
+ */
+router.get(
+    "/search",
+    verifyToken,
+    isUserOrAdmin,
+    lepingController.searchLepingud
+);
+
+
+/**
+ * @swagger
  * tags:
  *   name: Leping
  *   description: Contract management
@@ -48,7 +113,7 @@ const { verifyToken, isUserOrAdmin } = require("../middleware/authMiddleware");
  *                 type: number
  *               ostuhind:
  *                 type: number
- *               müügihind:
+ *               muugihind:
  *                 type: number
  *               leping_type:
  *                 type: string
@@ -146,5 +211,6 @@ router.delete(
     isUserOrAdmin,
     lepingController.deleteLeping
 );
+
 
 module.exports = router;

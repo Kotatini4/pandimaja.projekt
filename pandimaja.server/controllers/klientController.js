@@ -243,3 +243,29 @@ exports.updateKlient = async (req, res) => {
         res.status(500).json({ message: "Error updating client." });
     }
 };
+
+exports.autocompleteKlients = async (req, res) => {
+    const { search } = req.query;
+    if (!search) {
+        return res.status(400).json({ message: "Search query is required." });
+    }
+
+    try {
+        const results = await models.klient.findAll({
+            where: {
+                [Op.or]: [
+                    { klient_id: isNaN(search) ? -1 : parseInt(search) },
+                    { nimi: { [Op.iLike]: `%${search}%` } },
+                    { perekonnanimi: { [Op.iLike]: `%${search}%` } },
+                    { kood: { [Op.iLike]: `%${search}%` } },
+                ],
+            },
+            limit: 10,
+        });
+
+        res.json(results);
+    } catch (err) {
+        console.error("Autocomplete klient search error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};

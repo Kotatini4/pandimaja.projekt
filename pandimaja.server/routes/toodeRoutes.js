@@ -17,6 +17,69 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+
+/**
+ * @swagger
+ * /api/toode/{id}/buyout:
+ *   post:
+ *     summary: Mark product as bought out (update status)
+ *     tags: [Toode]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Product status updated to 'bought out'
+ *       404:
+ *         description: Product not found
+ */
+router.post(
+    "/:id/buyout",
+    verifyToken,
+    isUserOrAdmin,
+    toodeController.buyoutToode
+);
+
+
+/**
+ * @swagger
+ * /api/toode/autocomplete:
+ *   get:
+ *     summary: Autocomplete products by ID, name or description
+ *     tags: [Toode]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: search
+ *         in: query
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Search keyword to match against ID, name, or description
+ *       - name: type
+ *         in: query
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Optional contract type to filter products
+ *     responses:
+ *       200:
+ *         description: Matched products
+ */
+router.get(
+    "/autocomplete",
+    verifyToken,
+    isUserOrAdmin,
+    toodeController.autocompleteTooded
+);
+
+
+
 /**
  * @swagger
  * tags:

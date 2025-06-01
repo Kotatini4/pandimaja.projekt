@@ -5,6 +5,33 @@ const { verifyToken, isUserOrAdmin } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
+ * /api/klient/autocomplete:
+ *   get:
+ *     summary: Автозаполнение клиентов по ID, имени, фамилии или коду
+ *     tags: [Klient]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: search
+ *         in: query
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Поисковый запрос для поиска по ID, имени, фамилии или коду
+ *     responses:
+ *       200:
+ *         description: Найденные клиенты
+ */
+router.get(
+    "/autocomplete",
+    verifyToken,
+    isUserOrAdmin,
+    klientController.autocompleteKlients // Эту функцию нужно добавить в контроллер
+);
+
+
+/**
+ * @swagger
  * tags:
  *   name: Klient
  *   description: API для работы с клиентами
