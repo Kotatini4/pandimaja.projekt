@@ -16,7 +16,7 @@ module.exports = function (sequelize, DataTypes) {
             kirjeldus: {
                 type: DataTypes.TEXT,
                 allowNull: true,
-                field: "kirjaldus", // соответствует названию в БД
+                field: "kirjaldus",
             },
             status_id: {
                 type: DataTypes.INTEGER,

@@ -14,14 +14,14 @@ import {
     MenuItem,
     Pagination,
 } from "@mui/material";
-import { styled } from '@mui/system';
+import { styled } from "@mui/system";
 
 // ✅ Styled Grid Container: меняем display на block при <600px
 const ResponsiveGridContainer = styled(Grid)(({ theme }) => ({
-    display: 'flex',
-    flexWrap: 'wrap',
-    [theme.breakpoints.down('sm')]: {
-        display: 'block !important',
+    display: "flex",
+    flexWrap: "wrap",
+    [theme.breakpoints.down("sm")]: {
+        display: "block !important",
     },
 }));
 
@@ -49,14 +49,16 @@ export default function Home() {
     } else if (sortBy === "name_desc") {
         sorted.sort((a, b) => b.nimetus.localeCompare(a.nimetus));
     } else if (sortBy === "price_asc") {
-        sorted.sort((a, b) =>
-            parseFloat(a.hind.replace(/[^0-9.]/g, "")) -
-            parseFloat(b.hind.replace(/[^0-9.]/g, ""))
+        sorted.sort(
+            (a, b) =>
+                parseFloat(a.hind.replace(/[^0-9.]/g, "")) -
+                parseFloat(b.hind.replace(/[^0-9.]/g, ""))
         );
     } else if (sortBy === "price_desc") {
-        sorted.sort((a, b) =>
-            parseFloat(b.hind.replace(/[^0-9.]/g, "")) -
-            parseFloat(a.hind.replace(/[^0-9.]/g, ""))
+        sorted.sort(
+            (a, b) =>
+                parseFloat(b.hind.replace(/[^0-9.]/g, "")) -
+                parseFloat(a.hind.replace(/[^0-9.]/g, ""))
         );
     }
 
@@ -75,17 +77,21 @@ export default function Home() {
                 <Typography variant="h4">Товары в продаже</Typography>
 
                 <FormControl size="small" sx={{ minWidth: 200 }}>
-                    <InputLabel>Сортировка</InputLabel>
+                    <InputLabel>Sort by</InputLabel>
                     <Select
                         value={sortBy}
-                        label="Сортировка"
+                        label="Sort by"
                         onChange={(e) => setSortBy(e.target.value)}
                     >
-                        <MenuItem value="">Без сортировки</MenuItem>
-                        <MenuItem value="name_asc">Название: A–Z</MenuItem>
-                        <MenuItem value="name_desc">Название: Z–A</MenuItem>
-                        <MenuItem value="price_asc">Цена: ↑</MenuItem>
-                        <MenuItem value="price_desc">Цена: ↓</MenuItem>
+                        <MenuItem value="">No sorting</MenuItem>
+                        <MenuItem value="name_asc">Name: A–Z</MenuItem>
+                        <MenuItem value="name_desc">Name: Z–A</MenuItem>
+                        <MenuItem value="price_asc">
+                            Price: Low to High
+                        </MenuItem>
+                        <MenuItem value="price_desc">
+                            Price: High to Low
+                        </MenuItem>
                     </Select>
                 </FormControl>
             </Stack>
@@ -100,21 +106,21 @@ export default function Home() {
                         md={4}
                         lg={3}
                         xl={2}
-                        sx={{ display: 'flex' }}
+                        sx={{ display: "flex" }}
                     >
                         <Card
                             sx={{
-                                width: '100%',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                height: '100%',
+                                width: "100%",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "space-between",
+                                height: "100%",
                                 minHeight: 360,
-                                boxSizing: 'border-box',
-                                '@media (max-width:600px)': {
-                                    marginLeft: '-16px',
-                                    marginRight: '-16px',
-                                    width: 'calc(100% + 32px)',
+                                boxSizing: "border-box",
+                                "@media (max-width:600px)": {
+                                    marginLeft: "-16px",
+                                    marginRight: "-16px",
+                                    width: "calc(100% + 32px)",
                                 },
                             }}
                         >
