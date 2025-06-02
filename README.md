@@ -75,15 +75,26 @@ A full-stack web application for managing pawnshop operations, including contrac
 │ └── index.js
 └── README.md
 
-## ⚙️ Backend Setup
+Backend Setup
 cd server
 npm install
 node index.js
 swagger - http://localhost:3000/api-docs/
 
-## ⚙️ Frontend Setup
+Frontend Setup
 cd client
 npm install
 npm run dev
 Runs frontend on http://localhost:5173
+
+Future Improvements
+Admin dashboard & reporting
+
+Multi-language support (Estonian / Russian)
+
+Activity history (per client/product)
+
+Email/SMS reminders
+
+Dynamic permissions system
 ```
