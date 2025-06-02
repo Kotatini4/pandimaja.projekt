@@ -30,7 +30,6 @@ exports.createToode = async (req, res) => {
     }
 };
 
-
 exports.autocompleteTooded = async (req, res) => {
     const { search, type } = req.query;
 
@@ -70,7 +69,9 @@ exports.getAllTooded = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
 
     if (page <= 0 || limit <= 0) {
-        return res.status(400).json({ message: "Invalid pagination parameters." });
+        return res
+            .status(400)
+            .json({ message: "Invalid pagination parameters." });
     }
 
     const offset = (page - 1) * limit;
@@ -95,7 +96,6 @@ exports.getAllTooded = async (req, res) => {
     }
 };
 
-
 exports.searchTooded = async (req, res) => {
     const { nimetus, kirjeldus, status_id } = req.query;
 
@@ -116,7 +116,8 @@ exports.searchTooded = async (req, res) => {
 
         if (filters.length === 0) {
             return res.status(400).json({
-                message: "Please provide at least one search parameter (nimetus, kirjeldus, status_id).",
+                message:
+                    "Please provide at least one search parameter (nimetus, kirjeldus, status_id).",
             });
         }
 
@@ -129,7 +130,9 @@ exports.searchTooded = async (req, res) => {
         res.status(200).json(tooded);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error while searching for products." });
+        res.status(500).json({
+            message: "Server error while searching for products.",
+        });
     }
 };
 
@@ -211,7 +214,9 @@ exports.getToodedByStatus = async (req, res) => {
         });
 
         if (!tooded || tooded.length === 0) {
-            return res.status(404).json({ message: "No products found with this status." });
+            return res
+                .status(404)
+                .json({ message: "No products found with this status." });
         }
 
         res.status(200).json(tooded);
@@ -237,7 +242,9 @@ exports.getToodedLaos = async (req, res) => {
         res.status(200).json(tooded);
     } catch (err) {
         console.error("Error:", err);
-        res.status(500).json({ message: "Error fetching products with status 'Laos'." });
+        res.status(500).json({
+            message: "Error fetching products with status 'Laos'.",
+        });
     }
 };
 
@@ -269,10 +276,14 @@ exports.buyoutToode = async (req, res) => {
         }
 
         await transaction.commit();
-        res.status(200).json({ message: "Product marked as bought out and contract updated." });
+        res.status(200).json({
+            message: "Product marked as bought out and contract updated.",
+        });
     } catch (error) {
         await transaction.rollback();
         console.error("Buyout error:", error);
-        res.status(500).json({ message: "Server error while buying out product." });
+        res.status(500).json({
+            message: "Server error while buying out product.",
+        });
     }
 };

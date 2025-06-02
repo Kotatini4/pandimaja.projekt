@@ -29,7 +29,7 @@ export default function Home() {
     const [products, setProducts] = useState([]);
     const [page, setPage] = useState(1);
     const [sortBy, setSortBy] = useState("");
-    const perPage = 24;
+    const perPage = 10;
 
     useEffect(() => {
         api.get("/toode/laos")
