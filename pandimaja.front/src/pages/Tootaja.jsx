@@ -15,9 +15,9 @@ import {
     Select,
     Stack,
     useMediaQuery,
-    Box
+    Box,
 } from "@mui/material";
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from "@mui/material/styles";
 import api from "../services/api";
 
 export default function Tootaja() {
@@ -178,23 +178,190 @@ export default function Tootaja() {
                             {workers.map((w) => (
                                 <TableRow key={w.tootaja_id}>
                                     <TableCell>{w.tootaja_id}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.nimi || ""} onChange={(e) => setForm({ ...form, nimi: e.target.value })} size="small" /> : w.nimi}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.perekonnanimi || ""} onChange={(e) => setForm({ ...form, perekonnanimi: e.target.value })} size="small" /> : w.perekonnanimi}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.kood || ""} onChange={(e) => setForm({ ...form, kood: e.target.value })} size="small" /> : w.kood}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.pass || ""} type="password" placeholder="New password" onChange={(e) => setForm({ ...form, pass: e.target.value })} size="small" /> : <Typography variant="body2" color="text.secondary">••••••</Typography>}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.tel || ""} onChange={(e) => setForm({ ...form, tel: e.target.value })} size="small" /> : w.tel}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.aadres || ""} onChange={(e) => setForm({ ...form, aadres: e.target.value })} size="small" /> : w.aadres}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <Select value={form.role_id || ""} onChange={(e) => setForm({ ...form, role_id: e.target.value })} size="small" fullWidth>{roles.map((role) => (<MenuItem key={role.id} value={role.id}>{role.name}</MenuItem>))}</Select> : roles.find((r) => r.id === w.role_id)?.name || "?"}</TableCell>
                                     <TableCell>
                                         {toggledEditId === w.tootaja_id ? (
-                                            <Stack direction="column" spacing={1}>
-                                                <Button onClick={handleSave} variant="contained" size="small">Save</Button>
-                                                <Button onClick={() => setToggledEditId(null)} variant="outlined" size="small">Cancel</Button>
+                                            <TextField
+                                                value={form.nimi || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        nimi: e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            w.nimi
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === w.tootaja_id ? (
+                                            <TextField
+                                                value={form.perekonnanimi || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        perekonnanimi:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            w.perekonnanimi
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === w.tootaja_id ? (
+                                            <TextField
+                                                value={form.kood || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        kood: e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            w.kood
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === w.tootaja_id ? (
+                                            <TextField
+                                                value={form.pass || ""}
+                                                type="password"
+                                                placeholder="New password"
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        pass: e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                            >
+                                                ••••••
+                                            </Typography>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === w.tootaja_id ? (
+                                            <TextField
+                                                value={form.tel || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        tel: e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            w.tel
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === w.tootaja_id ? (
+                                            <TextField
+                                                value={form.aadres || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        aadres: e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            w.aadres
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === w.tootaja_id ? (
+                                            <Select
+                                                value={form.role_id || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        role_id: e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                                fullWidth
+                                            >
+                                                {roles.map((role) => (
+                                                    <MenuItem
+                                                        key={role.id}
+                                                        value={role.id}
+                                                    >
+                                                        {role.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        ) : (
+                                            roles.find(
+                                                (r) => r.id === w.role_id
+                                            )?.name || "?"
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === w.tootaja_id ? (
+                                            <Stack
+                                                direction="column"
+                                                spacing={1}
+                                            >
+                                                <Button
+                                                    onClick={handleSave}
+                                                    variant="contained"
+                                                    size="small"
+                                                >
+                                                    Save
+                                                </Button>
+                                                <Button
+                                                    onClick={() =>
+                                                        setToggledEditId(null)
+                                                    }
+                                                    variant="outlined"
+                                                    size="small"
+                                                >
+                                                    Cancel
+                                                </Button>
                                             </Stack>
                                         ) : (
-                                            <Stack direction="column" spacing={1}>
-                                                <Button onClick={() => handleEdit(w)} size="small" variant="outlined">Edit</Button>
-                                                <Button onClick={() => handleDelete(w.tootaja_id)} size="small" color="error">Delete</Button>
+                                            <Stack
+                                                direction="column"
+                                                spacing={1}
+                                            >
+                                                {w.tootaja_id !== 1 && (
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleEdit(w)
+                                                        }
+                                                        size="small"
+                                                        variant="outlined"
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                )}
+                                                {w.tootaja_id !== 1 && (
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                w.tootaja_id
+                                                            )
+                                                        }
+                                                        size="small"
+                                                        color="error"
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                )}
                                             </Stack>
                                         )}
                                     </TableCell>
@@ -206,15 +373,44 @@ export default function Tootaja() {
                     <Box p={2}>
                         {workers.map((w) => (
                             <Paper key={w.tootaja_id} sx={{ p: 2, mb: 2 }}>
-                                <Typography><b>ID:</b> {w.tootaja_id}</Typography>
-                                <Typography><b>Name:</b> {w.nimi} {w.perekonnanimi}</Typography>
-                                <Typography><b>Kood:</b> {w.kood}</Typography>
-                                <Typography><b>Phone:</b> {w.tel}</Typography>
-                                <Typography><b>Address:</b> {w.aadres}</Typography>
-                                <Typography><b>Role:</b> {roles.find((r) => r.id === w.role_id)?.name || "?"}</Typography>
+                                <Typography>
+                                    <b>ID:</b> {w.tootaja_id}
+                                </Typography>
+                                <Typography>
+                                    <b>Name:</b> {w.nimi} {w.perekonnanimi}
+                                </Typography>
+                                <Typography>
+                                    <b>Kood:</b> {w.kood}
+                                </Typography>
+                                <Typography>
+                                    <b>Phone:</b> {w.tel}
+                                </Typography>
+                                <Typography>
+                                    <b>Address:</b> {w.aadres}
+                                </Typography>
+                                <Typography>
+                                    <b>Role:</b>{" "}
+                                    {roles.find((r) => r.id === w.role_id)
+                                        ?.name || "?"}
+                                </Typography>
                                 <Stack direction="row" spacing={1} mt={1}>
-                                    <Button variant="outlined" size="small" onClick={() => handleEdit(w)}>Edit</Button>
-                                    <Button variant="outlined" color="error" size="small" onClick={() => handleDelete(w.tootaja_id)}>Delete</Button>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        onClick={() => handleEdit(w)}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        color="error"
+                                        size="small"
+                                        onClick={() =>
+                                            handleDelete(w.tootaja_id)
+                                        }
+                                    >
+                                        Delete
+                                    </Button>
                                 </Stack>
                             </Paper>
                         ))}

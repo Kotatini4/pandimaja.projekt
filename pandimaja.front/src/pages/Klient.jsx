@@ -11,143 +11,115 @@ import {
     Typography,
     Button,
     TablePagination,
-    MenuItem,
     Select,
+    MenuItem,
     Stack,
     useMediaQuery,
-    Box
+    Box,
 } from "@mui/material";
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from "@mui/material/styles";
 import api from "../services/api";
 
-export default function Tootaja() {
-    const [toggledEditId, setToggledEditId] = useState(null);
-    const [form, setForm] = useState({});
-    const [search, setSearch] = useState("");
-    const [workers, setWorkers] = useState([]);
-    const [page, setPage] = useState(0);
-    const [rowsPerPage] = useState(10);
-    const [total, setTotal] = useState(0);
-
+export default function Klient() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const roles = [
-        { id: 1, name: "admin" },
-        { id: 2, name: "user" },
-        { id: 3, name: "NA" },
-    ];
+    const [clients, setClients] = useState([]);
+    const [form, setForm] = useState({});
+    const [editingId, setEditingId] = useState(null);
+    const [search, setSearch] = useState("");
+    const [page, setPage] = useState(0);
+    const [rowsPerPage] = useState(10);
+    const [total, setTotal] = useState(0);
+    const statusOptions = ["active", "blocked"];
 
-    const fetchWorkers = async () => {
+    const fetchClients = async () => {
         try {
             if (search.trim()) {
-                const res = await api.get("/tootaja/search", {
+                const res = await api.get("/klient/search", {
                     params: {
                         nimi: search.trim(),
                         perekonnanimi: search.trim(),
                         kood: search.trim(),
                     },
                 });
-                setWorkers(res.data);
+                setClients(res.data);
                 setTotal(res.data.length);
             } else {
                 const res = await api.get(
-                    `/tootaja?page=${page + 1}&limit=${rowsPerPage}`
+                    `/klient?page=${page + 1}&limit=${rowsPerPage}`
                 );
-                setWorkers(res.data.data);
+                setClients(res.data.data);
                 setTotal(res.data.total);
             }
         } catch (err) {
-            console.error("Error loading employees", err);
-            setWorkers([]);
-            setTotal(0);
-            alert(err.response?.data?.message || "Error loading employees");
+            console.error(err);
+            alert(err.response?.data?.message || "Error fetching clients");
         }
     };
 
     useEffect(() => {
-        fetchWorkers();
+        fetchClients();
     }, [page]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (search.trim()) {
-                fetchWorkers();
-            } else {
-                setPage(0);
-                fetchWorkers();
-            }
+            setPage(0);
+            fetchClients();
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
 
-    const handleEdit = (worker) => {
-        setToggledEditId(worker.tootaja_id);
-        setForm({ ...worker, pass: "" });
+    const handleEdit = (c) => {
+        setForm(c);
+        setEditingId(c.klient_id);
     };
 
     const handleDelete = async (id) => {
-        if (
-            window.confirm("Are you sure you want to delete this employee?") &&
-            window.confirm("This action cannot be undone. Proceed?") &&
-            window.confirm("Final confirmation: Delete permanently?")
-        ) {
-            try {
-                await api.delete(`/tootaja/${id}`);
-                fetchWorkers();
-                alert("Employee deleted.");
-            } catch (err) {
-                const msg =
-                    err.response?.data?.message ||
-                    "Unknown error while deleting.";
-                alert(msg);
-            }
+        if (!window.confirm("Really delete this client?")) return;
+        try {
+            await api.delete(`/klient/${id}`);
+            fetchClients();
+            alert("Client deleted");
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || "Error deleting client");
         }
     };
 
     const handleSave = async () => {
         if (!form.nimi || !form.perekonnanimi || !form.kood) {
-            alert("Name, surname, and kood are required.");
+            alert("First name, last name and kood are required.");
             return;
         }
-
-        if (!/^[0-9]{11}$/.test(form.kood)) {
-            alert("Kood must be exactly 11 digits.");
+        if (!/^[1-6][0-9]{10}$/.test(form.kood)) {
+            alert("Kood must be 11 digits and start with 1–6.");
             return;
         }
-
-        if (form.pass && form.pass.length < 6) {
-            alert("Password must be at least 6 characters.");
-            return;
-        }
-
         if (form.tel && !/^\+?[0-9]+$/.test(form.tel)) {
-            alert("Phone must contain only numbers and optional leading +.");
-            return;
-        }
-
-        if (form.role_id && ![1, 2, 3].includes(Number(form.role_id))) {
-            alert("Role must be 1 (admin), 2 (user), or 3 (NA).");
+            alert("Phone must contain only digits and optional leading +.");
             return;
         }
 
         try {
-            await api.patch(`/tootaja/${form.tootaja_id}`, form);
-            setToggledEditId(null);
-            fetchWorkers();
+            await api.patch(`/klient/${form.klient_id}`, form);
+            setEditingId(null);
+            fetchClients();
+            alert("Client updated successfully");
         } catch (err) {
-            const msg =
-                err.response?.data?.message || "Unknown error while saving.";
-            alert(msg);
+            console.error(err);
+            alert(err.response?.data?.message || "Error saving client");
         }
     };
 
-    const handleChangePage = (event, newPage) => setPage(newPage);
+    const handleChangePage = (e, newPage) => {
+        setPage(newPage);
+    };
 
     return (
         <Container sx={{ mt: 4 }}>
             <Typography variant="h5" gutterBottom>
-                Employee List
+                Clients
             </Typography>
 
             <TextField
@@ -158,8 +130,168 @@ export default function Tootaja() {
                 sx={{ mb: 2 }}
             />
 
-            <Paper sx={{ overflowX: "auto" }}>
-                {!isMobile ? (
+            {isMobile ? (
+                // 👉 Мобильная версия (карточки)
+                <Stack spacing={2}>
+                    {clients.map((c) => (
+                        <Paper key={c.klient_id} sx={{ p: 2 }}>
+                            <Typography variant="subtitle1">
+                                <b>ID:</b> {c.klient_id}
+                            </Typography>
+                            <Typography>
+                                <b>Name:</b>{" "}
+                                {editingId === c.klient_id ? (
+                                    <TextField
+                                        size="small"
+                                        value={form.nimi || ""}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                nimi: e.target.value,
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    c.nimi
+                                )}
+                            </Typography>
+                            <Typography>
+                                <b>Surname:</b>{" "}
+                                {editingId === c.klient_id ? (
+                                    <TextField
+                                        size="small"
+                                        value={form.perekonnanimi || ""}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                perekonnanimi: e.target.value,
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    c.perekonnanimi
+                                )}
+                            </Typography>
+                            <Typography>
+                                <b>Kood:</b>{" "}
+                                {editingId === c.klient_id ? (
+                                    <TextField
+                                        size="small"
+                                        value={form.kood || ""}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                kood: e.target.value,
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    c.kood
+                                )}
+                            </Typography>
+                            <Typography>
+                                <b>Phone:</b>{" "}
+                                {editingId === c.klient_id ? (
+                                    <TextField
+                                        size="small"
+                                        value={form.tel || ""}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                tel: e.target.value,
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    c.tel
+                                )}
+                            </Typography>
+                            <Typography>
+                                <b>Address:</b>{" "}
+                                {editingId === c.klient_id ? (
+                                    <TextField
+                                        size="small"
+                                        value={form.aadres || ""}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                aadres: e.target.value,
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    c.aadres
+                                )}
+                            </Typography>
+                            <Typography>
+                                <b>Status:</b>{" "}
+                                {editingId === c.klient_id ? (
+                                    <Select
+                                        size="small"
+                                        value={form.status || ""}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                status: e.target.value,
+                                            })
+                                        }
+                                    >
+                                        {statusOptions.map((s) => (
+                                            <MenuItem key={s} value={s}>
+                                                {s}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                ) : (
+                                    c.status
+                                )}
+                            </Typography>
+                            <Stack direction="row" spacing={1} mt={2}>
+                                {editingId === c.klient_id ? (
+                                    <>
+                                        <Button
+                                            size="small"
+                                            variant="contained"
+                                            onClick={handleSave}
+                                        >
+                                            Save
+                                        </Button>
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={() => setEditingId(null)}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={() => handleEdit(c)}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            size="small"
+                                            color="error"
+                                            variant="outlined"
+                                            onClick={() =>
+                                                handleDelete(c.klient_id)
+                                            }
+                                        >
+                                            Delete
+                                        </Button>
+                                    </>
+                                )}
+                            </Stack>
+                        </Paper>
+                    ))}
+                </Stack>
+            ) : (
+                // 👉 Десктопная таблица
+                <Paper>
                     <Table>
                         <TableHead>
                             <TableRow>
@@ -167,68 +299,58 @@ export default function Tootaja() {
                                 <TableCell>First Name</TableCell>
                                 <TableCell>Last Name</TableCell>
                                 <TableCell>Kood</TableCell>
-                                <TableCell>Password</TableCell>
                                 <TableCell>Phone</TableCell>
                                 <TableCell>Address</TableCell>
-                                <TableCell>Role</TableCell>
+                                <TableCell>Status</TableCell>
                                 <TableCell>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {workers.map((w) => (
-                                <TableRow key={w.tootaja_id}>
-                                    <TableCell>{w.tootaja_id}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.nimi || ""} onChange={(e) => setForm({ ...form, nimi: e.target.value })} size="small" /> : w.nimi}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.perekonnanimi || ""} onChange={(e) => setForm({ ...form, perekonnanimi: e.target.value })} size="small" /> : w.perekonnanimi}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.kood || ""} onChange={(e) => setForm({ ...form, kood: e.target.value })} size="small" /> : w.kood}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.pass || ""} type="password" placeholder="New password" onChange={(e) => setForm({ ...form, pass: e.target.value })} size="small" /> : <Typography variant="body2" color="text.secondary">••••••</Typography>}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.tel || ""} onChange={(e) => setForm({ ...form, tel: e.target.value })} size="small" /> : w.tel}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <TextField value={form.aadres || ""} onChange={(e) => setForm({ ...form, aadres: e.target.value })} size="small" /> : w.aadres}</TableCell>
-                                    <TableCell>{toggledEditId === w.tootaja_id ? <Select value={form.role_id || ""} onChange={(e) => setForm({ ...form, role_id: e.target.value })} size="small" fullWidth>{roles.map((role) => (<MenuItem key={role.id} value={role.id}>{role.name}</MenuItem>))}</Select> : roles.find((r) => r.id === w.role_id)?.name || "?"}</TableCell>
+                            {clients.map((c) => (
+                                <TableRow key={c.klient_id}>
+                                    <TableCell>{c.klient_id}</TableCell>
+                                    <TableCell>{c.nimi}</TableCell>
+                                    <TableCell>{c.perekonnanimi}</TableCell>
+                                    <TableCell>{c.kood}</TableCell>
+                                    <TableCell>{c.tel}</TableCell>
+                                    <TableCell>{c.aadres}</TableCell>
+                                    <TableCell>{c.status}</TableCell>
                                     <TableCell>
-                                        {toggledEditId === w.tootaja_id ? (
-                                            <Stack direction="column" spacing={1}>
-                                                <Button onClick={handleSave} variant="contained" size="small">Save</Button>
-                                                <Button onClick={() => setToggledEditId(null)} variant="outlined" size="small">Cancel</Button>
-                                            </Stack>
-                                        ) : (
-                                            <Stack direction="column" spacing={1}>
-                                                <Button onClick={() => handleEdit(w)} size="small" variant="outlined">Edit</Button>
-                                                <Button onClick={() => handleDelete(w.tootaja_id)} size="small" color="error">Delete</Button>
-                                            </Stack>
-                                        )}
+                                        <Stack direction="column" spacing={1}>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => handleEdit(c)}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                color="error"
+                                                onClick={() =>
+                                                    handleDelete(c.klient_id)
+                                                }
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Stack>
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
-                ) : (
-                    <Box p={2}>
-                        {workers.map((w) => (
-                            <Paper key={w.tootaja_id} sx={{ p: 2, mb: 2 }}>
-                                <Typography><b>ID:</b> {w.tootaja_id}</Typography>
-                                <Typography><b>Name:</b> {w.nimi} {w.perekonnanimi}</Typography>
-                                <Typography><b>Kood:</b> {w.kood}</Typography>
-                                <Typography><b>Phone:</b> {w.tel}</Typography>
-                                <Typography><b>Address:</b> {w.aadres}</Typography>
-                                <Typography><b>Role:</b> {roles.find((r) => r.id === w.role_id)?.name || "?"}</Typography>
-                                <Stack direction="row" spacing={1} mt={1}>
-                                    <Button variant="outlined" size="small" onClick={() => handleEdit(w)}>Edit</Button>
-                                    <Button variant="outlined" color="error" size="small" onClick={() => handleDelete(w.tootaja_id)}>Delete</Button>
-                                </Stack>
-                            </Paper>
-                        ))}
-                    </Box>
-                )}
-                <TablePagination
-                    component="div"
-                    count={total}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    rowsPerPageOptions={[10]}
-                />
-            </Paper>
+
+                    <TablePagination
+                        component="div"
+                        count={total}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        rowsPerPageOptions={[10]}
+                    />
+                </Paper>
+            )}
         </Container>
     );
 }

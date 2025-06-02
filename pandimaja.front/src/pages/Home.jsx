@@ -38,7 +38,7 @@ export default function Home() {
                 setProducts(filtered);
             })
             .catch((err) => {
-                console.error("Ошибка загрузки товаров:", err);
+                console.error("Error loading products:", err);
             });
     }, []);
 
@@ -74,7 +74,7 @@ export default function Home() {
                 mb={2}
                 gap={2}
             >
-                <Typography variant="h4">Товары в продаже</Typography>
+                <Typography variant="h4">Goods for sale.</Typography>
 
                 <FormControl size="small" sx={{ minWidth: 200 }}>
                     <InputLabel>Sort by</InputLabel>

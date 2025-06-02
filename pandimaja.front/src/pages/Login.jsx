@@ -26,7 +26,7 @@ export default function Login() {
             setUser(res.data.user);
             navigate("/");
         } catch (err) {
-            alert("Ошибка входа: неверный код или пароль");
+            alert(" Login error: incorrect code or password.");
         }
     };
 
@@ -34,7 +34,7 @@ export default function Login() {
         <Container maxWidth="sm" sx={{ mt: 10 }}>
             <Paper elevation={3} sx={{ p: 4 }}>
                 <Typography variant="h5" align="center" gutterBottom>
-                    Вход в систему
+                    Sign In
                 </Typography>
 
                 <Box component="form" onSubmit={handleSubmit}>
@@ -48,7 +48,7 @@ export default function Login() {
                             fullWidth
                         />
                         <TextField
-                            label="Пароль"
+                            label="Password"
                             variant="outlined"
                             type="password"
                             value={pass}
@@ -62,7 +62,7 @@ export default function Login() {
                             size="large"
                             fullWidth
                         >
-                            Войти
+                            Sign In
                         </Button>
                     </Stack>
                 </Box>
