@@ -20,11 +20,14 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
+    Stack
 } from "@mui/material";
 import api from "../services/api";
 import { Link } from "react-router-dom";
-
+import { useTheme, useMediaQuery } from "@mui/material";
 export default function Leping() {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const [contracts, setContracts] = useState([]);
     const [sortBy, setSortBy] = useState("");
 
@@ -89,7 +92,16 @@ export default function Leping() {
                 Contracts
             </Typography>
 
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Box
+                sx={{
+                    display: "flex",
+                    gap: 2,
+                    flexWrap: "wrap",
+                    mb: 2,
+                    flexDirection: { xs: "column", sm: "row" },
+                    "& > *": { width: { xs: "100%", sm: "auto" } }
+                }}
+            >
                 <TextField
                     label="Client First Name"
                     value={searchParams.klient_nimi}
@@ -131,6 +143,7 @@ export default function Leping() {
                 <Button variant="outlined" onClick={fetchContracts}>Reset</Button>
             </Box>
 
+
             <FormControl sx={{ minWidth: 200, mb: 2 }}>
                 <InputLabel>Sort By</InputLabel>
                 <Select
@@ -145,65 +158,124 @@ export default function Leping() {
             </FormControl>
 
             <Paper>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Client</TableCell>
-                            <TableCell>Isikukood</TableCell>
-                            <TableCell>Product</TableCell>
-                            <TableCell>Employee</TableCell>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Date Valja Ostud</TableCell>
-                            <TableCell>Deposit</TableCell>
-                            <TableCell>Buyout</TableCell>
-                            <TableCell>Type</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
+                {isMobile ? (
+                    // Мобильная версия — карточки
+                    <Stack spacing={2} p={2}>
                         {sorted.map((c) => (
-                            <TableRow key={c.leping_id}>
-                                <TableCell>{c.leping_id}</TableCell>
-                                <TableCell>
-                                    {c.klient ? `${c.klient.nimi} ${c.klient.perekonnanimi}` : "—"}
-                                </TableCell>
-                                <TableCell>{c.klient?.kood || "—"}</TableCell>
-                                <TableCell>{c.toode?.nimetus || "—"}</TableCell>
-                                <TableCell>
-                                    {c.tootaja
-                                        ? `${c.tootaja.nimi} ${c.tootaja.perekonnanimi}`
-                                        : "—"}
-                                </TableCell>
-                                <TableCell>{c.date || "—"}</TableCell>
-                                <TableCell>{c.date_valja_ostud || "—"}</TableCell>
-                                <TableCell>{c.pant_hind || "—"}</TableCell>
-                                <TableCell>{c.valja_ostud_hind || "—"}</TableCell>
-                                <TableCell>
-                                    {c.leping_type}
+                            <Paper key={c.leping_id} sx={{ p: 3, mb: 3 }}>
+                                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                                    Contract #{c.leping_id}
+                                </Typography>
+                                <Typography><b>Client:</b> {c.klient?.nimi} {c.klient?.perekonnanimi}</Typography>
+                                <Typography><b>ID Code:</b> {c.klient?.kood || "—"}</Typography>
+                                <Typography><b>Product:</b> {c.toode?.nimetus || "—"}</Typography>
+                                <Typography><b>Employee:</b> {c.tootaja?.nimi} {c.tootaja?.perekonnanimi}</Typography>
+                                <Typography><b>Date:</b> {c.date || "—"}</Typography>
+                                <Typography><b>Buyout Date:</b> {c.date_valja_ostud || "—"}</Typography>
+                                <Typography><b>Deposit:</b> {c.pant_hind || "—"}</Typography>
+                                <Typography><b>Buyout:</b> {c.valja_ostud_hind || "—"}</Typography>
+                                <Typography><b>Type:</b> {c.leping_type}</Typography>
+
+                                <Box
+                                    mt={3}
+                                    p={2}
+                                    bgcolor="#e3f2fd"
+                                    borderRadius={2}
+                                    display="flex"
+                                    flexDirection={{ xs: "column", sm: "row" }}
+                                    gap={2}
+                                    alignItems="flex-start"
+                                    flexWrap="wrap"
+                                >
                                     {c.leping_type === "pant" && c.toode_id && (
                                         <Button
-                                            variant="outlined"
-                                            size="small"
-                                            sx={{ ml: 1 }}
+                                            variant="contained"
+                                            color="warning"
+                                            size="medium"
                                             onClick={() => confirmBuyout(c.toode_id)}
                                         >
                                             Buy Out Product
                                         </Button>
                                     )}
-
                                     <Button
-                                        color="inherit"
+                                        variant="contained"
+                                        color="primary"
+                                        size="medium"
                                         component={Link}
                                         to={`/leping/print/${c.leping_id}`}
                                     >
                                         Print Contract
                                     </Button>
-                                </TableCell>
-                            </TableRow>
+                                </Box>
+                            </Paper>
+
+
                         ))}
-                    </TableBody>
-                </Table>
+                    </Stack>
+                ) : (
+                    // Десктопная таблица
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>ID</TableCell>
+                                <TableCell>Client</TableCell>
+                                <TableCell>Isikukood</TableCell>
+                                <TableCell>Product</TableCell>
+                                <TableCell>Employee</TableCell>
+                                <TableCell>Date</TableCell>
+                                <TableCell>Date Valja Ostud</TableCell>
+                                <TableCell>Deposit</TableCell>
+                                <TableCell>Buyout</TableCell>
+                                <TableCell>Type</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {sorted.map((c) => (
+                                <TableRow key={c.leping_id}>
+                                    <TableCell>{c.leping_id}</TableCell>
+                                    <TableCell>
+                                        {c.klient
+                                            ? `${c.klient.nimi} ${c.klient.perekonnanimi}`
+                                            : "—"}
+                                    </TableCell>
+                                    <TableCell>{c.klient?.kood || "—"}</TableCell>
+                                    <TableCell>{c.toode?.nimetus || "—"}</TableCell>
+                                    <TableCell>
+                                        {c.tootaja
+                                            ? `${c.tootaja.nimi} ${c.tootaja.perekonnanimi}`
+                                            : "—"}
+                                    </TableCell>
+                                    <TableCell>{c.date || "—"}</TableCell>
+                                    <TableCell>{c.date_valja_ostud || "—"}</TableCell>
+                                    <TableCell>{c.pant_hind || "—"}</TableCell>
+                                    <TableCell>{c.valja_ostud_hind || "—"}</TableCell>
+                                    <TableCell>
+                                        {c.leping_type}
+                                        {c.leping_type === "pant" && c.toode_id && (
+                                            <Button
+                                                variant="outlined"
+                                                size="small"
+                                                sx={{ ml: 1 }}
+                                                onClick={() => confirmBuyout(c.toode_id)}
+                                            >
+                                                Buy Out Product
+                                            </Button>
+                                        )}
+                                        <Button
+                                            color="inherit"
+                                            component={Link}
+                                            to={`/leping/print/${c.leping_id}`}
+                                        >
+                                            Print Contract
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
             </Paper>
+
 
             <Button
                 variant="contained"

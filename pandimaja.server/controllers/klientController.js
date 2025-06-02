@@ -98,7 +98,7 @@ exports.getAllKlients = async (req, res) => {
         const { count, rows } = await models.klient.findAndCountAll({
             limit,
             offset,
-            order: [["klient_id", "ASC"]],
+            order: [["klient_id", "DESC"]],
         });
 
         res.status(200).json({

@@ -8,9 +8,9 @@ exports.createToode = async (req, res) => {
     const { nimetus, kirjeldus, status_id, hind } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : null;
 
-    if (!nimetus || !status_id || hind === undefined) {
+    if (!nimetus || hind === undefined) {
         return res.status(400).json({
-            message: "Required fields missing (nimetus, status_id, hind).",
+            message: "Required fields missing (nimetus, hind).",
         });
     }
 
@@ -18,7 +18,7 @@ exports.createToode = async (req, res) => {
         const newToode = await models.toode.create({
             nimetus,
             kirjeldus,
-            status_id,
+            status_id: status_id || 5,
             image,
             hind,
         });
@@ -29,6 +29,7 @@ exports.createToode = async (req, res) => {
         res.status(500).json({ message: "Error creating product." });
     }
 };
+
 
 exports.autocompleteTooded = async (req, res) => {
     const { search, type } = req.query;
@@ -78,7 +79,7 @@ exports.getAllTooded = async (req, res) => {
         const { count, rows } = await models.toode.findAndCountAll({
             limit,
             offset,
-            order: [["toode_id", "ASC"]],
+            order: [["toode_id", "DESC"]], // Последние записи сверху
         });
 
         res.status(200).json({
@@ -93,6 +94,7 @@ exports.getAllTooded = async (req, res) => {
         res.status(500).json({ message: "Error fetching products." });
     }
 };
+
 
 exports.searchTooded = async (req, res) => {
     const { nimetus, kirjeldus, status_id } = req.query;

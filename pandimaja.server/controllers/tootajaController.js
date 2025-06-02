@@ -146,7 +146,7 @@ exports.getAllTootajad = async (req, res) => {
             ],
             limit,
             offset,
-            order: [["tootaja_id", "ASC"]],
+            order: [["tootaja_id", "DESC"]],
         });
 
         res.status(200).json({

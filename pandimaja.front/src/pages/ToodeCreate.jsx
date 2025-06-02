@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
     Container,
     TextField,
     Button,
     Typography,
-    MenuItem,
     Paper,
     Stack,
 } from "@mui/material";
@@ -15,19 +14,11 @@ export default function ToodeCreate() {
     const [form, setForm] = useState({
         nimetus: "",
         kirjeldus: "",
-        status_id: "",
         hind: "",
         image: null,
     });
-    const [statuses, setStatuses] = useState([]);
-    const navigate = useNavigate();
 
-    useEffect(() => {
-        // Load product statuses
-        api.get("/status_toode")
-            .then((res) => setStatuses(res.data))
-            .catch((err) => console.error("Error loading statuses:", err));
-    }, []);
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -41,15 +32,14 @@ export default function ToodeCreate() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!form.nimetus || !form.status_id || form.hind === "") {
-            alert("Please fill out the required fields: name, status, price.");
+        if (!form.nimetus || form.hind === "") {
+            alert("Please fill out the required fields: name and price.");
             return;
         }
 
         const data = new FormData();
         data.append("nimetus", form.nimetus);
         data.append("kirjeldus", form.kirjeldus);
-        data.append("status_id", form.status_id);
         data.append("hind", form.hind);
         if (form.image) {
             data.append("image", form.image);
@@ -99,24 +89,6 @@ export default function ToodeCreate() {
                             fullWidth
                             required
                         />
-                        <TextField
-                            select
-                            label="Status"
-                            name="status_id"
-                            value={form.status_id}
-                            onChange={handleChange}
-                            fullWidth
-                            required
-                        >
-                            {statuses.map((status) => (
-                                <MenuItem
-                                    key={status.status_id}
-                                    value={status.status_id}
-                                >
-                                    {status.nimetus}
-                                </MenuItem>
-                            ))}
-                        </TextField>
                         <Button variant="contained" component="label">
                             Upload Image
                             <input

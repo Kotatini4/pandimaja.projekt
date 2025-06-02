@@ -58,20 +58,21 @@ exports.getAllLepingud = async (req, res) => {
             include: [
                 {
                     model: models.klient,
-                    as: "klient", // <--- обязательно
+                    as: "klient",
                     attributes: ["nimi", "perekonnanimi", "kood"],
                 },
                 {
                     model: models.toode,
-                    as: "toode", // <--- обязательно
+                    as: "toode",
                     attributes: ["nimetus", "image", "hind"],
                 },
                 {
                     model: models.tootaja,
-                    as: "tootaja", // <--- обязательно
+                    as: "tootaja",
                     attributes: ["nimi", "perekonnanimi"],
                 },
             ],
+            order: [["leping_id", "DESC"]], // ← новые договоры первыми
         });
         res.status(200).json(lepingud);
     } catch (err) {
@@ -79,6 +80,7 @@ exports.getAllLepingud = async (req, res) => {
         res.status(500).json({ message: "Error fetching contracts." });
     }
 };
+
 
 // Get contract by ID
 exports.getLepingById = async (req, res) => {
