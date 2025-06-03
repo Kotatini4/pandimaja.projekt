@@ -269,3 +269,20 @@ exports.autocompleteKlients = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+exports.deleteKlient = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const klient = await models.klient.findByPk(id);
+        if (!klient) {
+            return res.status(404).json({ message: "Client not found." });
+        }
+
+        await klient.destroy();
+        res.status(200).json({ message: "Client deleted successfully." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error deleting client." });
+    }
+};

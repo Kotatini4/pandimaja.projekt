@@ -76,7 +76,16 @@ export default function Klient() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Really delete this client?")) return;
+        const confirms = [
+            "Are you sure you want to delete this client?",
+            "Are you REALLY sure?",
+            "This action is irreversible. Delete anyway?",
+        ];
+
+        for (const message of confirms) {
+            if (!window.confirm(message)) return;
+        }
+
         try {
             await api.delete(`/klient/${id}`);
             fetchClients();

@@ -29,7 +29,6 @@ router.get(
     klientController.autocompleteKlients // Эту функцию нужно добавить в контроллер
 );
 
-
 /**
  * @swagger
  * tags:
@@ -176,5 +175,31 @@ router.get("/:id", verifyToken, isUserOrAdmin, klientController.getKlientById);
  *         description: Клиент не найден
  */
 router.patch("/:id", verifyToken, isUserOrAdmin, klientController.updateKlient);
+
+/**
+ * @swagger
+ * /api/klient/{id}:
+ *   delete:
+ *     summary: Удалить клиента по ID (только для администратора или работника)
+ *     tags: [Klient]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID клиента
+ *     responses:
+ *       200:
+ *         description: Клиент успешно удален
+ *       404:
+ *         description: Клиент не найден
+ */
+router.delete(
+    "/:id",
+    verifyToken,
+    isUserOrAdmin,
+    klientController.deleteKlient
+);
 
 module.exports = router;
