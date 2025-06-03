@@ -131,7 +131,7 @@ export default function Klient() {
             />
 
             {isMobile ? (
-                // 👉 Мобильная версия (карточки)
+                // Мобильная версия
                 <Stack spacing={2}>
                     {clients.map((c) => (
                         <Paper key={c.klient_id} sx={{ p: 2 }}>
@@ -290,7 +290,7 @@ export default function Klient() {
                     ))}
                 </Stack>
             ) : (
-                // 👉 Десктопная таблица
+                // Десктопная таблица
                 <Paper>
                     <Table>
                         <TableHead>

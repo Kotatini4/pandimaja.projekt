@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
 import {
     Container,
     TextField,
@@ -30,6 +28,7 @@ export default function LepingCreate() {
     const [loadingKlient, setLoadingKlient] = useState(false);
     const [loadingToode, setLoadingToode] = useState(false);
     const [klientBlocked, setKlientBlocked] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
 
     const today = new Date();
     const datePlus30 = new Date(today);
@@ -49,7 +48,7 @@ export default function LepingCreate() {
     });
 
     const navigate = useNavigate();
-    const { user } = useContext(AuthContext);
+
     useEffect(() => {
         const storedUser = JSON.parse(localStorage.getItem("user"));
         if (storedUser?.tootaja_id) {
@@ -59,7 +58,7 @@ export default function LepingCreate() {
             }));
         }
         if (storedUser?.nimi || storedUser?.perekonnanimi) {
-            setCurrentUser(storedUser); // сохраним всего пользователя
+            setCurrentUser(storedUser);
         }
     }, []);
 
@@ -101,6 +100,7 @@ export default function LepingCreate() {
             setLoadingToode(false);
         }
     };
+
     useEffect(() => {
         if (form.leping_type) {
             loadToodedByLepingType();
@@ -162,6 +162,7 @@ export default function LepingCreate() {
                                     </MenuItem>
                                 ))}
                             </TextField>
+
                             <Autocomplete
                                 options={klients}
                                 loading={loadingKlient}
@@ -197,12 +198,12 @@ export default function LepingCreate() {
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <>
-                                                    {loadingKlient ? (
+                                                    {loadingKlient && (
                                                         <CircularProgress
                                                             color="inherit"
                                                             size={20}
                                                         />
-                                                    ) : null}
+                                                    )}
                                                     {
                                                         params.InputProps
                                                             .endAdornment
@@ -244,12 +245,12 @@ export default function LepingCreate() {
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <>
-                                                    {loadingToode ? (
+                                                    {loadingToode && (
                                                         <CircularProgress
                                                             color="inherit"
                                                             size={20}
                                                         />
-                                                    ) : null}
+                                                    )}
                                                     {
                                                         params.InputProps
                                                             .endAdornment
@@ -261,20 +262,14 @@ export default function LepingCreate() {
                                 )}
                             />
 
-                            <TextField
-                                label="Employee"
-                                value={
-                                    currentUser
-                                        ? `${currentUser.nimi || ""} ${
-                                              currentUser.perekonnanimi || ""
-                                          }`
-                                        : ""
-                                }
-                                fullWidth
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                            />
+                            {currentUser && (
+                                <TextField
+                                    label="Employee"
+                                    value={`${currentUser.name} ${currentUser.perekonnanimi}`}
+                                    fullWidth
+                                    InputProps={{ readOnly: true }}
+                                />
+                            )}
 
                             <DatePicker
                                 label="Contract Date"
@@ -313,7 +308,6 @@ export default function LepingCreate() {
                                 onChange={handleChange}
                                 fullWidth
                             />
-
                             <TextField
                                 label="Buyback Value (€)"
                                 name="valja_ostud_hind"
@@ -322,7 +316,6 @@ export default function LepingCreate() {
                                 onChange={handleChange}
                                 fullWidth
                             />
-
                             <TextField
                                 label="Purchase Price (€)"
                                 name="ostuhind"
@@ -331,7 +324,6 @@ export default function LepingCreate() {
                                 onChange={handleChange}
                                 fullWidth
                             />
-
                             <TextField
                                 label="Selling Price (€)"
                                 name="muugihind"
