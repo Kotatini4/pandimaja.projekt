@@ -20,7 +20,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
-    Stack
+    Stack,
 } from "@mui/material";
 import api from "../services/api";
 import { Link } from "react-router-dom";
@@ -99,28 +99,37 @@ export default function Leping() {
                     flexWrap: "wrap",
                     mb: 2,
                     flexDirection: { xs: "column", sm: "row" },
-                    "& > *": { width: { xs: "100%", sm: "auto" } }
+                    "& > *": { width: { xs: "100%", sm: "auto" } },
                 }}
             >
                 <TextField
                     label="Client First Name"
                     value={searchParams.klient_nimi}
                     onChange={(e) =>
-                        setSearchParams({ ...searchParams, klient_nimi: e.target.value })
+                        setSearchParams({
+                            ...searchParams,
+                            klient_nimi: e.target.value,
+                        })
                     }
                 />
                 <TextField
                     label="Client Last Name"
                     value={searchParams.klient_perekonnanimi}
                     onChange={(e) =>
-                        setSearchParams({ ...searchParams, klient_perekonnanimi: e.target.value })
+                        setSearchParams({
+                            ...searchParams,
+                            klient_perekonnanimi: e.target.value,
+                        })
                     }
                 />
                 <TextField
-                    label="ID Code"
+                    label="ID Contract"
                     value={searchParams.klient_kood}
                     onChange={(e) =>
-                        setSearchParams({ ...searchParams, klient_kood: e.target.value })
+                        setSearchParams({
+                            ...searchParams,
+                            klient_kood: e.target.value,
+                        })
                     }
                 />
                 <FormControl sx={{ minWidth: 150 }}>
@@ -129,7 +138,10 @@ export default function Leping() {
                         value={searchParams.leping_type}
                         label="Contract Type"
                         onChange={(e) =>
-                            setSearchParams({ ...searchParams, leping_type: e.target.value })
+                            setSearchParams({
+                                ...searchParams,
+                                leping_type: e.target.value,
+                            })
                         }
                     >
                         <MenuItem value="">All</MenuItem>
@@ -139,10 +151,13 @@ export default function Leping() {
                         <MenuItem value="väljaost">väljaost</MenuItem>
                     </Select>
                 </FormControl>
-                <Button variant="contained" onClick={handleSearch}>Search</Button>
-                <Button variant="outlined" onClick={fetchContracts}>Reset</Button>
+                <Button variant="contained" onClick={handleSearch}>
+                    Search
+                </Button>
+                <Button variant="outlined" onClick={fetchContracts}>
+                    Reset
+                </Button>
             </Box>
-
 
             <FormControl sx={{ minWidth: 200, mb: 2 }}>
                 <InputLabel>Sort By</InputLabel>
@@ -163,18 +178,43 @@ export default function Leping() {
                     <Stack spacing={2} p={2}>
                         {sorted.map((c) => (
                             <Paper key={c.leping_id} sx={{ p: 3, mb: 3 }}>
-                                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                                <Typography
+                                    variant="h6"
+                                    fontWeight="bold"
+                                    gutterBottom
+                                >
                                     Contract #{c.leping_id}
                                 </Typography>
-                                <Typography><b>Client:</b> {c.klient?.nimi} {c.klient?.perekonnanimi}</Typography>
-                                <Typography><b>ID Code:</b> {c.klient?.kood || "—"}</Typography>
-                                <Typography><b>Product:</b> {c.toode?.nimetus || "—"}</Typography>
-                                <Typography><b>Employee:</b> {c.tootaja?.nimi} {c.tootaja?.perekonnanimi}</Typography>
-                                <Typography><b>Date:</b> {c.date || "—"}</Typography>
-                                <Typography><b>Buyout Date:</b> {c.date_valja_ostud || "—"}</Typography>
-                                <Typography><b>Deposit:</b> {c.pant_hind || "—"}</Typography>
-                                <Typography><b>Buyout:</b> {c.valja_ostud_hind || "—"}</Typography>
-                                <Typography><b>Type:</b> {c.leping_type}</Typography>
+                                <Typography>
+                                    <b>Client:</b> {c.klient?.nimi}{" "}
+                                    {c.klient?.perekonnanimi}
+                                </Typography>
+                                <Typography>
+                                    <b>ID Code:</b> {c.klient?.kood || "—"}
+                                </Typography>
+                                <Typography>
+                                    <b>Product:</b> {c.toode?.nimetus || "—"}
+                                </Typography>
+                                <Typography>
+                                    <b>Employee:</b> {c.tootaja?.nimi}{" "}
+                                    {c.tootaja?.perekonnanimi}
+                                </Typography>
+                                <Typography>
+                                    <b>Date:</b> {c.date || "—"}
+                                </Typography>
+                                <Typography>
+                                    <b>Buyout Date:</b>{" "}
+                                    {c.date_valja_ostud || "—"}
+                                </Typography>
+                                <Typography>
+                                    <b>Deposit:</b> {c.pant_hind || "—"}
+                                </Typography>
+                                <Typography>
+                                    <b>Buyout:</b> {c.valja_ostud_hind || "—"}
+                                </Typography>
+                                <Typography>
+                                    <b>Type:</b> {c.leping_type}
+                                </Typography>
 
                                 <Box
                                     mt={3}
@@ -192,7 +232,9 @@ export default function Leping() {
                                             variant="contained"
                                             color="warning"
                                             size="medium"
-                                            onClick={() => confirmBuyout(c.toode_id)}
+                                            onClick={() =>
+                                                confirmBuyout(c.toode_id)
+                                            }
                                         >
                                             Buy Out Product
                                         </Button>
@@ -208,8 +250,6 @@ export default function Leping() {
                                     </Button>
                                 </Box>
                             </Paper>
-
-
                         ))}
                     </Stack>
                 ) : (
@@ -238,29 +278,42 @@ export default function Leping() {
                                             ? `${c.klient.nimi} ${c.klient.perekonnanimi}`
                                             : "—"}
                                     </TableCell>
-                                    <TableCell>{c.klient?.kood || "—"}</TableCell>
-                                    <TableCell>{c.toode?.nimetus || "—"}</TableCell>
+                                    <TableCell>
+                                        {c.klient?.kood || "—"}
+                                    </TableCell>
+                                    <TableCell>
+                                        {c.toode?.nimetus || "—"}
+                                    </TableCell>
                                     <TableCell>
                                         {c.tootaja
                                             ? `${c.tootaja.nimi} ${c.tootaja.perekonnanimi}`
                                             : "—"}
                                     </TableCell>
                                     <TableCell>{c.date || "—"}</TableCell>
-                                    <TableCell>{c.date_valja_ostud || "—"}</TableCell>
+                                    <TableCell>
+                                        {c.date_valja_ostud || "—"}
+                                    </TableCell>
                                     <TableCell>{c.pant_hind || "—"}</TableCell>
-                                    <TableCell>{c.valja_ostud_hind || "—"}</TableCell>
+                                    <TableCell>
+                                        {c.valja_ostud_hind || "—"}
+                                    </TableCell>
                                     <TableCell>
                                         {c.leping_type}
-                                        {c.leping_type === "pant" && c.toode_id && (
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{ ml: 1 }}
-                                                onClick={() => confirmBuyout(c.toode_id)}
-                                            >
-                                                Buy Out Product
-                                            </Button>
-                                        )}
+                                        {c.leping_type === "pant" &&
+                                            c.toode_id && (
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    sx={{ ml: 1 }}
+                                                    onClick={() =>
+                                                        confirmBuyout(
+                                                            c.toode_id
+                                                        )
+                                                    }
+                                                >
+                                                    Buy Out Product
+                                                </Button>
+                                            )}
                                         <Button
                                             color="inherit"
                                             component={Link}
@@ -275,7 +328,6 @@ export default function Leping() {
                     </Table>
                 )}
             </Paper>
-
 
             <Button
                 variant="contained"
@@ -292,12 +344,17 @@ export default function Leping() {
                 <DialogTitle>Confirm Buyout</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Are you sure you want to mark this product as bought out?
+                        Are you sure you want to mark this product as bought
+                        out?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-                    <Button onClick={handleBuyout} variant="contained" color="primary">
+                    <Button
+                        onClick={handleBuyout}
+                        variant="contained"
+                        color="primary"
+                    >
                         Confirm
                     </Button>
                 </DialogActions>

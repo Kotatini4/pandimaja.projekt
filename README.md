@@ -87,14 +87,15 @@ npm install
 npm run dev
 Runs frontend on http://localhost:5173
 
+Login:
+user: 38412012255    pass:user123
+admin: 38303123718  pass:admin123
+
+
 Future Improvements
 Admin dashboard & reporting
-
 Multi-language support (Estonian / Russian)
-
 Activity history (per client/product)
-
 Email/SMS reminders
-
 Dynamic permissions system
 ```
