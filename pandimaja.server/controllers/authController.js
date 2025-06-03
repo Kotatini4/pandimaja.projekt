@@ -142,6 +142,7 @@ exports.login = async (req, res) => {
         res.json({
             token,
             user: {
+                tootaja_id: user.tootaja_id, // ← добавь это
                 kood: user.kood,
                 name: user.nimi,
                 perekonnanimi: user.perekonnanimi,

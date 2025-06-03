@@ -23,7 +23,9 @@ export default function Login() {
         try {
             const res = await api.post("/auth/login", { kood, pass });
             localStorage.setItem("token", res.data.token);
+            localStorage.setItem("user", JSON.stringify(res.data.user));
             setUser(res.data.user);
+            console.log("User from AuthContext:", res.data.user);
             navigate("/");
         } catch (err) {
             alert(" Login error: incorrect code or password.");

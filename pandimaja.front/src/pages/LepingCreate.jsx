@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import {
     Container,
     TextField,
@@ -27,6 +29,7 @@ export default function LepingCreate() {
     const [tooded, setTooded] = useState([]);
     const [loadingKlient, setLoadingKlient] = useState(false);
     const [loadingToode, setLoadingToode] = useState(false);
+    const [klientBlocked, setKlientBlocked] = useState(false);
 
     const today = new Date();
     const datePlus30 = new Date(today);
@@ -46,24 +49,63 @@ export default function LepingCreate() {
     });
 
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
+    useEffect(() => {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser?.tootaja_id) {
+            setForm((prev) => ({
+                ...prev,
+                tootaja_id: storedUser.tootaja_id,
+            }));
+        }
+        if (storedUser?.nimi || storedUser?.perekonnanimi) {
+            setCurrentUser(storedUser); // сохраним всего пользователя
+        }
+    }, []);
 
     const searchKlients = debounce((query) => {
         if (!query) return;
         setLoadingKlient(true);
-        api.get(`/klient/autocomplete?search=${encodeURIComponent(query)}&type=${encodeURIComponent(form.leping_type)}`)
+        api.get(
+            `/klient/autocomplete?search=${encodeURIComponent(
+                query
+            )}&type=${encodeURIComponent(form.leping_type)}`
+        )
             .then((res) => setKlients(res.data))
             .catch((err) => console.error("Error searching klients:", err))
             .finally(() => setLoadingKlient(false));
     }, 300);
 
-    const searchTooded = debounce((query) => {
-        if (!query) return;
+    const loadToodedByLepingType = async () => {
         setLoadingToode(true);
-        api.get(`/toode/autocomplete?search=${encodeURIComponent(query)}&type=${encodeURIComponent(form.leping_type)}`)
-            .then((res) => setTooded(res.data))
-            .catch((err) => console.error("Error searching tooded:", err))
-            .finally(() => setLoadingToode(false));
-    }, 300);
+
+        const status_id =
+            form.leping_type === "pant" || form.leping_type === "ost"
+                ? 5
+                : form.leping_type === "müük"
+                ? 1
+                : null;
+
+        if (!status_id) {
+            setTooded([]);
+            setLoadingToode(false);
+            return;
+        }
+
+        try {
+            const res = await api.get(`/toode/status/${status_id}`);
+            setTooded(res.data);
+        } catch (err) {
+            console.error("Error loading tooded:", err);
+        } finally {
+            setLoadingToode(false);
+        }
+    };
+    useEffect(() => {
+        if (form.leping_type) {
+            loadToodedByLepingType();
+        }
+    }, [form.leping_type]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -75,9 +117,16 @@ export default function LepingCreate() {
         try {
             const payload = {
                 ...form,
+                tootaja_id: form.tootaja_id || null,
+                toode_id: form.toode_id || null,
+                pant_hind: form.pant_hind || 0,
+                valja_ostud_hind: form.valja_ostud_hind || 0,
+                ostuhind: form.ostuhind || 0,
+                muugihind: form.muugihind || 0,
                 date: formatForInput(form.date),
                 date_valja_ostud: formatForInput(form.date_valja_ostud),
             };
+            console.log("Submitting payload:", payload);
             await api.post("/leping", payload);
             alert("Contract created!");
             navigate("/leping");
@@ -116,10 +165,27 @@ export default function LepingCreate() {
                             <Autocomplete
                                 options={klients}
                                 loading={loadingKlient}
-                                getOptionLabel={(option) => `${option.nimi} ${option.perekonnanimi} (${option.kood})`}
-                                onInputChange={(e, value) => searchKlients(value)}
+                                getOptionLabel={(option) =>
+                                    `${option.nimi} ${option.perekonnanimi} (${option.kood})`
+                                }
+                                onInputChange={(e, value) =>
+                                    searchKlients(value)
+                                }
                                 onChange={(event, newValue) => {
-                                    setForm((prev) => ({ ...prev, klient_id: newValue?.klient_id || "" }));
+                                    if (newValue?.status === "blocked") {
+                                        setKlientBlocked(true);
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            klient_id: "",
+                                        }));
+                                    } else {
+                                        setKlientBlocked(false);
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            klient_id:
+                                                newValue?.klient_id || "",
+                                        }));
+                                    }
                                 }}
                                 renderInput={(params) => (
                                     <TextField
@@ -131,22 +197,42 @@ export default function LepingCreate() {
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <>
-                                                    {loadingKlient ? <CircularProgress color="inherit" size={20} /> : null}
-                                                    {params.InputProps.endAdornment}
+                                                    {loadingKlient ? (
+                                                        <CircularProgress
+                                                            color="inherit"
+                                                            size={20}
+                                                        />
+                                                    ) : null}
+                                                    {
+                                                        params.InputProps
+                                                            .endAdornment
+                                                    }
                                                 </>
                                             ),
                                         }}
                                     />
                                 )}
                             />
+                            {klientBlocked && (
+                                <Typography color="error">
+                                    The client is blacklisted and cannot be
+                                    selected.
+                                </Typography>
+                            )}
 
                             <Autocomplete
                                 options={tooded}
                                 loading={loadingToode}
-                                getOptionLabel={(option) => `#${option.toode_id} ${option.nimetus || ""}`}
-                                onInputChange={(e, value) => searchTooded(value)}
+                                getOptionLabel={(option) =>
+                                    `#${option.toode_id} ${
+                                        option.nimetus || ""
+                                    }`
+                                }
                                 onChange={(event, newValue) => {
-                                    setForm((prev) => ({ ...prev, toode_id: newValue?.toode_id || "" }));
+                                    setForm((prev) => ({
+                                        ...prev,
+                                        toode_id: newValue?.toode_id || "",
+                                    }));
                                 }}
                                 renderInput={(params) => (
                                     <TextField
@@ -158,8 +244,16 @@ export default function LepingCreate() {
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <>
-                                                    {loadingToode ? <CircularProgress color="inherit" size={20} /> : null}
-                                                    {params.InputProps.endAdornment}
+                                                    {loadingToode ? (
+                                                        <CircularProgress
+                                                            color="inherit"
+                                                            size={20}
+                                                        />
+                                                    ) : null}
+                                                    {
+                                                        params.InputProps
+                                                            .endAdornment
+                                                    }
                                                 </>
                                             ),
                                         }}
@@ -168,13 +262,18 @@ export default function LepingCreate() {
                             />
 
                             <TextField
-                                label="Employee ID"
-                                name="tootaja_id"
-                                type="number"
-                                value={form.tootaja_id}
-                                onChange={handleChange}
-                                required
+                                label="Employee"
+                                value={
+                                    currentUser
+                                        ? `${currentUser.nimi || ""} ${
+                                              currentUser.perekonnanimi || ""
+                                          }`
+                                        : ""
+                                }
                                 fullWidth
+                                InputProps={{
+                                    readOnly: true,
+                                }}
                             />
 
                             <DatePicker
@@ -197,7 +296,10 @@ export default function LepingCreate() {
                                 label="Buyback Date"
                                 value={form.date_valja_ostud}
                                 onChange={(newDate) => {
-                                    setForm((prev) => ({ ...prev, date_valja_ostud: newDate }));
+                                    setForm((prev) => ({
+                                        ...prev,
+                                        date_valja_ostud: newDate,
+                                    }));
                                 }}
                                 format="dd.MM.yyyy"
                                 slotProps={{ textField: { fullWidth: true } }}
@@ -238,8 +340,6 @@ export default function LepingCreate() {
                                 onChange={handleChange}
                                 fullWidth
                             />
-
-
 
                             <Button type="submit" variant="contained">
                                 Submit
