@@ -119,7 +119,16 @@ export default function Toode() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this product?")) return;
+        const confirms = [
+            "Are you sure you want to delete this product?",
+            "Are you REALLY sure?",
+            "This action is irreversible. Delete anyway?",
+        ];
+
+        for (const msg of confirms) {
+            if (!window.confirm(msg)) return;
+        }
+
         try {
             await api.delete(`/toode/${id}`);
             fetchProducts();
@@ -171,40 +180,148 @@ export default function Toode() {
                             <Typography variant="subtitle1">
                                 ID: {p.toode_id}
                             </Typography>
-                            <Typography>Name: {p.nimetus}</Typography>
-                            <Typography>Description: {p.kirjeldus}</Typography>
-                            <Typography>Price: {p.hind} €</Typography>
+                            <Typography>
+                                Name:{" "}
+                                {toggledEditId === p.toode_id ? (
+                                    <TextField
+                                        size="small"
+                                        value={form.nimetus}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                nimetus: e.target.value,
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    p.nimetus
+                                )}
+                            </Typography>
+                            <Typography>
+                                Description:{" "}
+                                {toggledEditId === p.toode_id ? (
+                                    <TextField
+                                        size="small"
+                                        value={form.kirjeldus}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                kirjeldus: e.target.value,
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    p.kirjeldus
+                                )}
+                            </Typography>
+                            <Typography>
+                                Price:{" "}
+                                {toggledEditId === p.toode_id ? (
+                                    <TextField
+                                        size="small"
+                                        value={form.hind}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                hind: e.target.value,
+                                            })
+                                        }
+                                    />
+                                ) : (
+                                    `${p.hind} €`
+                                )}
+                            </Typography>
                             <Typography>
                                 Status:{" "}
-                                {statuses.find(
-                                    (s) => s.status_id === p.status_id
-                                )?.nimetus || "-"}
+                                {toggledEditId === p.toode_id ? (
+                                    <Select
+                                        size="small"
+                                        value={form.status_id}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                status_id: e.target.value,
+                                            })
+                                        }
+                                    >
+                                        {statuses.map((s) => (
+                                            <MenuItem
+                                                key={s.status_id}
+                                                value={s.status_id}
+                                            >
+                                                {s.nimetus}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                ) : (
+                                    statuses.find(
+                                        (s) => s.status_id === p.status_id
+                                    )?.nimetus || "-"
+                                )}
                             </Typography>
-                            {p.image && (
-                                <img
-                                    src={`http://localhost:3000${p.image}`}
-                                    alt="product"
-                                    style={{ width: "100%", marginTop: 10 }}
-                                />
-                            )}
+                            <Typography>
+                                Image:{" "}
+                                {toggledEditId === p.toode_id ? (
+                                    <input
+                                        type="file"
+                                        onChange={handleFileChange}
+                                    />
+                                ) : p.image ? (
+                                    <img
+                                        src={`http://localhost:3000${p.image}`}
+                                        alt="product"
+                                        style={{ width: "100%", marginTop: 10 }}
+                                    />
+                                ) : (
+                                    "No image"
+                                )}
+                            </Typography>
+
                             <Stack direction="row" spacing={1} mt={2}>
-                                <Button
-                                    fullWidth
-                                    size="small"
-                                    variant="contained"
-                                    onClick={() => handleEdit(p)}
-                                >
-                                    Edit
-                                </Button>
-                                <Button
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    color="error"
-                                    onClick={() => handleDelete(p.toode_id)}
-                                >
-                                    Delete
-                                </Button>
+                                {toggledEditId === p.toode_id ? (
+                                    <>
+                                        <Button
+                                            fullWidth
+                                            size="small"
+                                            variant="contained"
+                                            onClick={handleSave}
+                                        >
+                                            Save
+                                        </Button>
+                                        <Button
+                                            fullWidth
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={() =>
+                                                setToggledEditId(null)
+                                            }
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button
+                                            fullWidth
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={() => handleEdit(p)}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            fullWidth
+                                            size="small"
+                                            variant="outlined"
+                                            color="error"
+                                            onClick={() =>
+                                                handleDelete(p.toode_id)
+                                            }
+                                        >
+                                            Delete
+                                        </Button>
+                                    </>
+                                )}
                             </Stack>
                         </Paper>
                     ))}
@@ -322,52 +439,54 @@ export default function Toode() {
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        {toggledEditId === p.toode_id ? (
-                                            <Stack
-                                                direction="column"
-                                                spacing={1}
-                                            >
-                                                <Button
-                                                    variant="contained"
-                                                    size="small"
-                                                    onClick={handleSave}
-                                                >
-                                                    Save
-                                                </Button>
-                                                <Button
-                                                    variant="outlined"
-                                                    size="small"
-                                                    onClick={() =>
-                                                        setToggledEditId(null)
-                                                    }
-                                                >
-                                                    Cancel
-                                                </Button>
-                                            </Stack>
-                                        ) : (
-                                            <Stack
-                                                direction="column"
-                                                spacing={1}
-                                            >
-                                                <Button
-                                                    size="small"
-                                                    onClick={() =>
-                                                        handleEdit(p)
-                                                    }
-                                                >
-                                                    Edit
-                                                </Button>
-                                                <Button
-                                                    size="small"
-                                                    color="error"
-                                                    onClick={() =>
-                                                        handleDelete(p.toode_id)
-                                                    }
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </Stack>
-                                        )}
+                                        <Stack direction="column" spacing={1}>
+                                            {toggledEditId === p.toode_id ? (
+                                                <>
+                                                    <Button
+                                                        variant="contained"
+                                                        size="small"
+                                                        onClick={handleSave}
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                    <Button
+                                                        variant="outlined"
+                                                        size="small"
+                                                        onClick={() =>
+                                                            setToggledEditId(
+                                                                null
+                                                            )
+                                                        }
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        onClick={() =>
+                                                            handleEdit(p)
+                                                        }
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                p.toode_id
+                                                            )
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </Stack>
                                     </TableCell>
                                 </TableRow>
                             ))}
