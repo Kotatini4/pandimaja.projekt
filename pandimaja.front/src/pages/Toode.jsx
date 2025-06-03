@@ -61,15 +61,18 @@ export default function Toode() {
 
     const fetchProducts = async () => {
         try {
-            const res = nameFilter || descFilter || statusFilter
-                ? await api.get("/toode/search", {
-                    params: {
-                        nimetus: nameFilter,
-                        kirjeldus: descFilter,
-                        status_id: statusFilter,
-                    },
-                })
-                : await api.get(`/toode?page=${page + 1}&limit=${rowsPerPage}`);
+            const res =
+                nameFilter || descFilter || statusFilter
+                    ? await api.get("/toode/search", {
+                          params: {
+                              nimetus: nameFilter,
+                              kirjeldus: descFilter,
+                              status_id: statusFilter,
+                          },
+                      })
+                    : await api.get(
+                          `/toode?page=${page + 1}&limit=${rowsPerPage}`
+                      );
             setProducts(res.data.data || res.data);
             setTotal(res.data.total || res.data.length);
         } catch (err) {
@@ -134,12 +137,29 @@ export default function Toode() {
             </Typography>
 
             <Stack direction="row" rowGap={2} sx={{ mb: 4 }} flexWrap="wrap">
-                <TextField label="Name" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} fullWidth />
-                <TextField label="Description" value={descFilter} onChange={(e) => setDescFilter(e.target.value)} fullWidth />
-                <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} displayEmpty fullWidth>
+                <TextField
+                    label="Name"
+                    value={nameFilter}
+                    onChange={(e) => setNameFilter(e.target.value)}
+                    fullWidth
+                />
+                <TextField
+                    label="Description"
+                    value={descFilter}
+                    onChange={(e) => setDescFilter(e.target.value)}
+                    fullWidth
+                />
+                <Select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    displayEmpty
+                    fullWidth
+                >
                     <MenuItem value="">All statuses</MenuItem>
                     {statuses.map((s) => (
-                        <MenuItem key={s.status_id} value={s.status_id}>{s.nimetus}</MenuItem>
+                        <MenuItem key={s.status_id} value={s.status_id}>
+                            {s.nimetus}
+                        </MenuItem>
                     ))}
                 </Select>
             </Stack>
@@ -148,15 +168,43 @@ export default function Toode() {
                 <Stack spacing={2}>
                     {products.map((p) => (
                         <Paper key={p.toode_id} sx={{ p: 2 }}>
-                            <Typography variant="subtitle1">ID: {p.toode_id}</Typography>
+                            <Typography variant="subtitle1">
+                                ID: {p.toode_id}
+                            </Typography>
                             <Typography>Name: {p.nimetus}</Typography>
                             <Typography>Description: {p.kirjeldus}</Typography>
                             <Typography>Price: {p.hind} €</Typography>
-                            <Typography>Status: {statuses.find(s => s.status_id === p.status_id)?.nimetus || "-"}</Typography>
-                            {p.image && <img src={`http://localhost:3000${p.image}`} alt="product" style={{ width: "100%", marginTop: 10 }} />}
+                            <Typography>
+                                Status:{" "}
+                                {statuses.find(
+                                    (s) => s.status_id === p.status_id
+                                )?.nimetus || "-"}
+                            </Typography>
+                            {p.image && (
+                                <img
+                                    src={`http://localhost:3000${p.image}`}
+                                    alt="product"
+                                    style={{ width: "100%", marginTop: 10 }}
+                                />
+                            )}
                             <Stack direction="row" spacing={1} mt={2}>
-                                <Button fullWidth size="small" variant="contained" onClick={() => handleEdit(p)}>Edit</Button>
-                                <Button fullWidth size="small" variant="outlined" color="error" onClick={() => handleDelete(p.toode_id)}>Delete</Button>
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    variant="contained"
+                                    onClick={() => handleEdit(p)}
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    fullWidth
+                                    size="small"
+                                    variant="outlined"
+                                    color="error"
+                                    onClick={() => handleDelete(p.toode_id)}
+                                >
+                                    Delete
+                                </Button>
                             </Stack>
                         </Paper>
                     ))}
@@ -179,21 +227,145 @@ export default function Toode() {
                             {products.map((p) => (
                                 <TableRow key={p.toode_id}>
                                     <TableCell>{p.toode_id}</TableCell>
-                                    <TableCell>{toggledEditId === p.toode_id ? <TextField value={form.nimetus} onChange={(e) => setForm({ ...form, nimetus: e.target.value })} size="small" /> : p.nimetus}</TableCell>
-                                    <TableCell>{toggledEditId === p.toode_id ? <TextField value={form.kirjeldus} onChange={(e) => setForm({ ...form, kirjeldus: e.target.value })} size="small" /> : p.kirjeldus}</TableCell>
-                                    <TableCell>{toggledEditId === p.toode_id ? <TextField value={form.hind} onChange={(e) => setForm({ ...form, hind: e.target.value })} size="small" /> : `${p.hind} €`}</TableCell>
-                                    <TableCell>{toggledEditId === p.toode_id ? <Select value={form.status_id} onChange={(e) => setForm({ ...form, status_id: e.target.value })} size="small">{statuses.map((s) => (<MenuItem key={s.status_id} value={s.status_id}>{s.nimetus}</MenuItem>))}</Select> : statuses.find(s => s.status_id === p.status_id)?.nimetus}</TableCell>
-                                    <TableCell>{toggledEditId === p.toode_id ? <input type="file" onChange={handleFileChange} /> : p.image ? <img src={`http://localhost:3000${p.image}`} alt="product" width={50} /> : "No image"}</TableCell>
                                     <TableCell>
                                         {toggledEditId === p.toode_id ? (
-                                            <Stack direction="column" spacing={1}>
-                                                <Button variant="contained" size="small" onClick={handleSave}>Save</Button>
-                                                <Button variant="outlined" size="small" onClick={() => setToggledEditId(null)}>Cancel</Button>
+                                            <TextField
+                                                value={form.nimetus}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        nimetus: e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            p.nimetus
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === p.toode_id ? (
+                                            <TextField
+                                                value={form.kirjeldus}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        kirjeldus:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            p.kirjeldus
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === p.toode_id ? (
+                                            <TextField
+                                                value={form.hind}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        hind: e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            />
+                                        ) : (
+                                            `${p.hind} €`
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === p.toode_id ? (
+                                            <Select
+                                                value={form.status_id}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        status_id:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                                size="small"
+                                            >
+                                                {statuses.map((s) => (
+                                                    <MenuItem
+                                                        key={s.status_id}
+                                                        value={s.status_id}
+                                                    >
+                                                        {s.nimetus}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        ) : (
+                                            statuses.find(
+                                                (s) =>
+                                                    s.status_id === p.status_id
+                                            )?.nimetus
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === p.toode_id ? (
+                                            <input
+                                                type="file"
+                                                onChange={handleFileChange}
+                                            />
+                                        ) : p.image ? (
+                                            <img
+                                                src={`http://localhost:3000${p.image}`}
+                                                alt="product"
+                                                width={50}
+                                            />
+                                        ) : (
+                                            "No image"
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {toggledEditId === p.toode_id ? (
+                                            <Stack
+                                                direction="column"
+                                                spacing={1}
+                                            >
+                                                <Button
+                                                    variant="contained"
+                                                    size="small"
+                                                    onClick={handleSave}
+                                                >
+                                                    Save
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    onClick={() =>
+                                                        setToggledEditId(null)
+                                                    }
+                                                >
+                                                    Cancel
+                                                </Button>
                                             </Stack>
                                         ) : (
-                                            <Stack direction="column" spacing={1}>
-                                                <Button size="small" onClick={() => handleEdit(p)}>Edit</Button>
-                                                <Button size="small" color="error" onClick={() => handleDelete(p.toode_id)}>Delete</Button>
+                                            <Stack
+                                                direction="column"
+                                                spacing={1}
+                                            >
+                                                <Button
+                                                    size="small"
+                                                    onClick={() =>
+                                                        handleEdit(p)
+                                                    }
+                                                >
+                                                    Edit
+                                                </Button>
+                                                <Button
+                                                    size="small"
+                                                    color="error"
+                                                    onClick={() =>
+                                                        handleDelete(p.toode_id)
+                                                    }
+                                                >
+                                                    Delete
+                                                </Button>
                                             </Stack>
                                         )}
                                     </TableCell>
@@ -201,7 +373,14 @@ export default function Toode() {
                             ))}
                         </TableBody>
                     </Table>
-                    <TablePagination component="div" count={total} page={page} onPageChange={handleChangePage} rowsPerPage={rowsPerPage} rowsPerPageOptions={[10]} />
+                    <TablePagination
+                        component="div"
+                        count={total}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        rowsPerPageOptions={[10]}
+                    />
                 </Paper>
             )}
         </Container>

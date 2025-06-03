@@ -309,31 +309,155 @@ export default function Klient() {
                             {clients.map((c) => (
                                 <TableRow key={c.klient_id}>
                                     <TableCell>{c.klient_id}</TableCell>
-                                    <TableCell>{c.nimi}</TableCell>
-                                    <TableCell>{c.perekonnanimi}</TableCell>
-                                    <TableCell>{c.kood}</TableCell>
-                                    <TableCell>{c.tel}</TableCell>
-                                    <TableCell>{c.aadres}</TableCell>
-                                    <TableCell>{c.status}</TableCell>
                                     <TableCell>
-                                        <Stack direction="column" spacing={1}>
-                                            <Button
+                                        {editingId === c.klient_id ? (
+                                            <TextField
                                                 size="small"
-                                                variant="outlined"
-                                                onClick={() => handleEdit(c)}
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button
+                                                value={form.nimi || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        nimi: e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        ) : (
+                                            c.nimi
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {editingId === c.klient_id ? (
+                                            <TextField
                                                 size="small"
-                                                variant="outlined"
-                                                color="error"
-                                                onClick={() =>
-                                                    handleDelete(c.klient_id)
+                                                value={form.perekonnanimi || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        perekonnanimi:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        ) : (
+                                            c.perekonnanimi
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {editingId === c.klient_id ? (
+                                            <TextField
+                                                size="small"
+                                                value={form.kood || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        kood: e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        ) : (
+                                            c.kood
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {editingId === c.klient_id ? (
+                                            <TextField
+                                                size="small"
+                                                value={form.tel || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        tel: e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        ) : (
+                                            c.tel
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {editingId === c.klient_id ? (
+                                            <TextField
+                                                size="small"
+                                                value={form.aadres || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        aadres: e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        ) : (
+                                            c.aadres
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {editingId === c.klient_id ? (
+                                            <Select
+                                                size="small"
+                                                value={form.status || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        status: e.target.value,
+                                                    })
                                                 }
                                             >
-                                                Delete
-                                            </Button>
+                                                {statusOptions.map((s) => (
+                                                    <MenuItem key={s} value={s}>
+                                                        {s}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        ) : (
+                                            c.status
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Stack direction="column" spacing={1}>
+                                            {editingId === c.klient_id ? (
+                                                <>
+                                                    <Button
+                                                        size="small"
+                                                        variant="contained"
+                                                        onClick={handleSave}
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        onClick={() =>
+                                                            setEditingId(null)
+                                                        }
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        onClick={() =>
+                                                            handleEdit(c)
+                                                        }
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color="error"
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                c.klient_id
+                                                            )
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </>
+                                            )}
                                         </Stack>
                                     </TableCell>
                                 </TableRow>
