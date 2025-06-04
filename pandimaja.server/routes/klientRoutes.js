@@ -26,7 +26,7 @@ router.get(
     "/autocomplete",
     verifyToken,
     isUserOrAdmin,
-    klientController.autocompleteKlients // Эту функцию нужно добавить в контроллер
+    klientController.autocompleteKlients
 );
 
 /**

@@ -85,6 +85,7 @@ const { Op } = require("sequelize");
 exports.getAllKlients = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const status = req.query.status?.toLowerCase(); // может быть "active", "blocked"
 
     if (page <= 0 || limit <= 0) {
         return res
@@ -93,9 +94,15 @@ exports.getAllKlients = async (req, res) => {
     }
 
     const offset = (page - 1) * limit;
+    const where = {};
+
+    if (status === "active" || status === "blocked") {
+        where.status = status;
+    }
 
     try {
         const { count, rows } = await models.klient.findAndCountAll({
+            where,
             limit,
             offset,
             order: [["klient_id", "DESC"]],
@@ -115,27 +122,30 @@ exports.getAllKlients = async (req, res) => {
 };
 
 exports.searchKlients = async (req, res) => {
-    const { nimi, perekonnanimi, kood } = req.query;
+    const { nimi, perekonnanimi, kood, status } = req.query;
     const searchTerm = nimi || perekonnanimi || kood;
 
-    try {
-        if (!searchTerm) {
-            return res.status(400).json({
-                message:
-                    "Please provide a search parameter (nimi, perekonnanimi, or kood).",
-            });
-        }
-
-        const klients = await models.klient.findAll({
-            where: {
-                [Op.or]: [
-                    { nimi: { [Op.iLike]: `%${searchTerm}%` } },
-                    { perekonnanimi: { [Op.iLike]: `%${searchTerm}%` } },
-                    { kood: { [Op.like]: `%${searchTerm}%` } },
-                ],
-            },
+    if (!searchTerm) {
+        return res.status(400).json({
+            message:
+                "Please provide a search parameter (nimi, perekonnanimi, or kood).",
         });
+    }
 
+    const where = {
+        [Op.or]: [
+            { nimi: { [Op.iLike]: `%${searchTerm}%` } },
+            { perekonnanimi: { [Op.iLike]: `%${searchTerm}%` } },
+            { kood: { [Op.like]: `%${searchTerm}%` } },
+        ],
+    };
+
+    if (status === "active" || status === "blocked") {
+        where.status = status;
+    }
+
+    try {
+        const klients = await models.klient.findAll({ where });
         res.status(200).json(klients);
     } catch (error) {
         console.error(error);

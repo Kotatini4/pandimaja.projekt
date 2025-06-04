@@ -15,7 +15,6 @@ import {
     MenuItem,
     Stack,
     useMediaQuery,
-    Box,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import api from "../services/api";
@@ -28,6 +27,7 @@ export default function Klient() {
     const [form, setForm] = useState({});
     const [editingId, setEditingId] = useState(null);
     const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
     const [page, setPage] = useState(0);
     const [rowsPerPage] = useState(10);
     const [total, setTotal] = useState(0);
@@ -35,20 +35,30 @@ export default function Klient() {
 
     const fetchClients = async () => {
         try {
-            if (search.trim()) {
+            const params = {
+                page: page + 1,
+                limit: rowsPerPage,
+            };
+
+            if (statusFilter !== "all") {
+                params.status = statusFilter;
+            }
+
+            const trimmed = search.trim();
+
+            if (trimmed.length > 0) {
                 const res = await api.get("/klient/search", {
                     params: {
-                        nimi: search.trim(),
-                        perekonnanimi: search.trim(),
-                        kood: search.trim(),
+                        ...params,
+                        nimi: trimmed,
+                        perekonnanimi: trimmed,
+                        kood: trimmed,
                     },
                 });
                 setClients(res.data);
                 setTotal(res.data.length);
             } else {
-                const res = await api.get(
-                    `/klient?page=${page + 1}&limit=${rowsPerPage}`
-                );
+                const res = await api.get("/klient", { params });
                 setClients(res.data.data);
                 setTotal(res.data.total);
             }
@@ -66,9 +76,9 @@ export default function Klient() {
         const timer = setTimeout(() => {
             setPage(0);
             fetchClients();
-        }, 500);
+        }, 300);
         return () => clearTimeout(timer);
-    }, [search]);
+    }, [search, statusFilter]);
 
     const handleEdit = (c) => {
         setForm(c);
@@ -131,130 +141,88 @@ export default function Klient() {
                 Clients
             </Typography>
 
-            <TextField
-                label="Search by name or ID code"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                fullWidth
+            <Stack
+                direction={isMobile ? "column" : "row"}
+                spacing={2}
                 sx={{ mb: 2 }}
-            />
+            >
+                <TextField
+                    label="Search by name or ID code"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    fullWidth
+                />
+                <Select
+                    value={statusFilter}
+                    onChange={(e) => {
+                        setStatusFilter(e.target.value);
+                        setPage(0);
+                    }}
+                    displayEmpty
+                    sx={{ minWidth: 150 }}
+                >
+                    <MenuItem value="all">All statuses</MenuItem>
+                    <MenuItem value="active">Active</MenuItem>
+                    <MenuItem value="blocked">Blocked</MenuItem>
+                </Select>
+            </Stack>
 
             {isMobile ? (
-                // Мобильная версия
                 <Stack spacing={2}>
                     {clients.map((c) => (
                         <Paper key={c.klient_id} sx={{ p: 2 }}>
                             <Typography variant="subtitle1">
                                 <b>ID:</b> {c.klient_id}
                             </Typography>
-                            <Typography>
-                                <b>Name:</b>{" "}
-                                {editingId === c.klient_id ? (
-                                    <TextField
-                                        size="small"
-                                        value={form.nimi || ""}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                nimi: e.target.value,
-                                            })
-                                        }
-                                    />
-                                ) : (
-                                    c.nimi
-                                )}
-                            </Typography>
-                            <Typography>
-                                <b>Surname:</b>{" "}
-                                {editingId === c.klient_id ? (
-                                    <TextField
-                                        size="small"
-                                        value={form.perekonnanimi || ""}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                perekonnanimi: e.target.value,
-                                            })
-                                        }
-                                    />
-                                ) : (
-                                    c.perekonnanimi
-                                )}
-                            </Typography>
-                            <Typography>
-                                <b>Kood:</b>{" "}
-                                {editingId === c.klient_id ? (
-                                    <TextField
-                                        size="small"
-                                        value={form.kood || ""}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                kood: e.target.value,
-                                            })
-                                        }
-                                    />
-                                ) : (
-                                    c.kood
-                                )}
-                            </Typography>
-                            <Typography>
-                                <b>Phone:</b>{" "}
-                                {editingId === c.klient_id ? (
-                                    <TextField
-                                        size="small"
-                                        value={form.tel || ""}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                tel: e.target.value,
-                                            })
-                                        }
-                                    />
-                                ) : (
-                                    c.tel
-                                )}
-                            </Typography>
-                            <Typography>
-                                <b>Address:</b>{" "}
-                                {editingId === c.klient_id ? (
-                                    <TextField
-                                        size="small"
-                                        value={form.aadres || ""}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                aadres: e.target.value,
-                                            })
-                                        }
-                                    />
-                                ) : (
-                                    c.aadres
-                                )}
-                            </Typography>
-                            <Typography>
-                                <b>Status:</b>{" "}
-                                {editingId === c.klient_id ? (
-                                    <Select
-                                        size="small"
-                                        value={form.status || ""}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                status: e.target.value,
-                                            })
-                                        }
-                                    >
-                                        {statusOptions.map((s) => (
-                                            <MenuItem key={s} value={s}>
-                                                {s}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                ) : (
-                                    c.status
-                                )}
-                            </Typography>
+                            {[
+                                "nimi",
+                                "perekonnanimi",
+                                "kood",
+                                "tel",
+                                "aadres",
+                                "status",
+                            ].map((field) => (
+                                <Typography key={field}>
+                                    <b>
+                                        {field.charAt(0).toUpperCase() +
+                                            field.slice(1)}
+                                        :
+                                    </b>{" "}
+                                    {editingId === c.klient_id ? (
+                                        field === "status" ? (
+                                            <Select
+                                                size="small"
+                                                value={form.status || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        status: e.target.value,
+                                                    })
+                                                }
+                                            >
+                                                {statusOptions.map((s) => (
+                                                    <MenuItem key={s} value={s}>
+                                                        {s}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        ) : (
+                                            <TextField
+                                                size="small"
+                                                value={form[field] || ""}
+                                                onChange={(e) =>
+                                                    setForm({
+                                                        ...form,
+                                                        [field]: e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        )
+                                    ) : (
+                                        c[field]
+                                    )}
+                                </Typography>
+                            ))}
                             <Stack direction="row" spacing={1} mt={2}>
                                 {editingId === c.klient_id ? (
                                     <>
@@ -299,7 +267,6 @@ export default function Klient() {
                     ))}
                 </Stack>
             ) : (
-                // Десктопная таблица
                 <Paper>
                     <Table>
                         <TableHead>
@@ -473,7 +440,6 @@ export default function Klient() {
                             ))}
                         </TableBody>
                     </Table>
-
                     <TablePagination
                         component="div"
                         count={total}
