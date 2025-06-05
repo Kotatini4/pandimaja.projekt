@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { Container, Typography } from "@mui/material";
+import { Button } from "@mui/material";
+import { Link } from "react-router-dom";
 
 export default function LepingPrint() {
     const { id } = useParams(); // ✔️ получаем ID из URL
@@ -38,67 +40,105 @@ export default function LepingPrint() {
 
     return (
         <Container sx={{ mt: 4, fontFamily: "serif", maxWidth: 800 }}>
+            <Button
+                variant="outlined"
+                component={Link}
+                to="/leping"
+                sx={{ mb: 2 }}
+            >
+                Back to Contracts
+            </Button>
             <Typography variant="h4" align="center" gutterBottom>
                 Laenuleping
             </Typography>
 
-            <Typography><strong>Aadress:</strong> Puskini 19, Narva</Typography>
-            <Typography><strong>Lepingu number:</strong> {leping.leping_id}</Typography>
+            <Typography>
+                <strong>Aadress:</strong> Puskini 19, Narva
+            </Typography>
+            <Typography>
+                <strong>Lepingu number:</strong> {leping.leping_id}
+            </Typography>
             <Typography>
                 <strong>Kuupäev:</strong>{" "}
-                {leping.date ? new Date(leping.date).toLocaleDateString("et-EE") : "—"}
+                {leping.date
+                    ? new Date(leping.date).toLocaleDateString("et-EE")
+                    : "—"}
             </Typography>
 
-
             <Typography paragraph>
-                1. <strong>FinTag OÜ</strong> (edasi laenuandja) ja {leping.klient?.nimi} {leping.klient?.perekonnanimi} (edasi laenusaaja);
-                isikukood {leping.klient?.kood}; elukoht {leping.klient?.aadres}; tel. {leping.klient?.tel}
+                1. <strong>FinTag OÜ</strong> (edasi laenuandja) ja{" "}
+                {leping.klient?.nimi} {leping.klient?.perekonnanimi} (edasi
+                laenusaaja); isikukood {leping.klient?.kood}; elukoht{" "}
+                {leping.klient?.aadres}; tel. {leping.klient?.tel}
             </Typography>
             <Typography paragraph>
                 2. Laenu tagastamine kokkuleppe põhjal{" "}
-                <strong>{leping.date_valja_ostud ? new Date(leping.date_valja_ostud).toLocaleDateString("et-EE") : "—"}</strong>.
+                <strong>
+                    {leping.date_valja_ostud
+                        ? new Date(leping.date_valja_ostud).toLocaleDateString(
+                              "et-EE"
+                          )
+                        : "—"}
+                </strong>
+                .
             </Typography>
 
             <Typography paragraph>
-                3. Laenusaaja annab laenuandjale pandiks <strong>"{leping.toode?.nimetus}"</strong>.
+                3. Laenusaaja annab laenuandjale pandiks{" "}
+                <strong>"{leping.toode?.nimetus}"</strong>.
             </Typography>
             <Typography paragraph>
                 4. Laenuandja annab laenusaajale laenu summas{" "}
-            <strong>{leping.pant_hind ? Number(leping.pant_hind).toFixed(2) : "—"} EUR.</strong>
+                <strong>
+                    {leping.pant_hind
+                        ? Number(leping.pant_hind).toFixed(2)
+                        : "—"}{" "}
+                    EUR.
+                </strong>
                 Lepingu sõlmimistasu 1,00 EUR.
             </Typography>
             <Typography paragraph>
-                5. Laenu kasutamise eest arvutatakse minimaalse intressi suuruses 3 EUR, või 1.2% päevas.
+                5. Laenu kasutamise eest arvutatakse minimaalse intressi
+                suuruses 3 EUR, või 1.2% päevas.
             </Typography>
             <Typography paragraph>
-                6. Laenusaaja kohustab tagastama laenuandjale laenu summa ja intressi suuruses 14,00 EUR.
+                6. Laenusaaja kohustab tagastama laenuandjale laenu summa ja
+                intressi suuruses 14,00 EUR.
             </Typography>
             <Typography paragraph>
-                7. Kui laenusaaja ei täida kohustust tähtajaks, määratakse trahv 3% päevas laenusummalt.
+                7. Kui laenusaaja ei täida kohustust tähtajaks, määratakse trahv
+                3% päevas laenusummalt.
             </Typography>
             <Typography paragraph>
-                8. Kui laenu ei tagastata 7 päeva jooksul pärast tähtaega, on laenuandjal õigus pant realiseerida.
+                8. Kui laenu ei tagastata 7 päeva jooksul pärast tähtaega, on
+                laenuandjal õigus pant realiseerida.
             </Typography>
             <Typography paragraph>
-                9. Kui selgub, et panditud asi on varastatud, blokeeritud või defektiga, esitab laenuandja pretensiooni.
+                9. Kui selgub, et panditud asi on varastatud, blokeeritud või
+                defektiga, esitab laenuandja pretensiooni.
             </Typography>
             <Typography paragraph>
                 10. Trahv 9. punkti rikkumise eest on 35 EUR.
             </Typography>
             <Typography paragraph>
-                11. Laenusaaja kinnitab, et pant on tema omand ja korras seisukorras.
+                11. Laenusaaja kinnitab, et pant on tema omand ja korras
+                seisukorras.
             </Typography>
             <Typography paragraph>
-                12. Leping on koostatud kahes eksemplaris. Pant tagastatakse pärast kogu summa maksmist.
+                12. Leping on koostatud kahes eksemplaris. Pant tagastatakse
+                pärast kogu summa maksmist.
             </Typography>
             <Typography paragraph>
                 13. Allkirjade andmisega kinnitab laenusaaja, et sai raha kätte.
             </Typography>
 
             <br />
-            <Typography>Laenusaaja: ________________________ (allkiri)</Typography>
-            <Typography>Firma esindaja: _____________________ (allkiri)</Typography>
-
+            <Typography>
+                Laenusaaja: ________________________ (allkiri)
+            </Typography>
+            <Typography>
+                Firma esindaja: _____________________ (allkiri)
+            </Typography>
         </Container>
     );
 }

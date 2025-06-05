@@ -21,33 +21,42 @@ import {
     DialogContentText,
     DialogActions,
     Stack,
+    TablePagination,
 } from "@mui/material";
 import api from "../services/api";
 import { Link } from "react-router-dom";
 import { useTheme, useMediaQuery } from "@mui/material";
+
 export default function Leping() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
     const [contracts, setContracts] = useState([]);
     const [sortBy, setSortBy] = useState("");
-
     const [searchParams, setSearchParams] = useState({
         klient_nimi: "",
         klient_perekonnanimi: "",
         klient_kood: "",
         leping_type: "",
     });
-
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [total, setTotal] = useState(0);
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedToodeId, setSelectedToodeId] = useState(null);
 
     useEffect(() => {
-        fetchContracts();
-    }, []);
+        handleSearch();
+    }, [page]);
 
     const fetchContracts = () => {
-        api.get("/leping")
-            .then((res) => setContracts(res.data))
+        api.get("/leping", {
+            params: { page: page + 1, limit: rowsPerPage },
+        })
+            .then((res) => {
+                setContracts(res.data.data);
+                setTotal(res.data.total);
+            })
             .catch((err) => console.error("Error fetching contracts:", err));
     };
 
@@ -56,9 +65,14 @@ export default function Leping() {
         Object.entries(searchParams).forEach(([key, value]) => {
             if (value.trim()) params.append(key, value.trim());
         });
+        params.append("page", page + 1);
+        params.append("limit", rowsPerPage);
 
         api.get(`/leping/search?${params.toString()}`)
-            .then((res) => setContracts(res.data))
+            .then((res) => {
+                setContracts(res.data.data);
+                setTotal(res.data.total);
+            })
             .catch((err) => console.error("Error searching contracts:", err));
     };
 
@@ -78,6 +92,10 @@ export default function Leping() {
             setOpenDialog(false);
             setSelectedToodeId(null);
         }
+    };
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
     };
 
     const sorted = [...contracts].sort((a, b) => {
@@ -159,22 +177,23 @@ export default function Leping() {
                 </Button>
             </Box>
 
-            <FormControl sx={{ minWidth: 200, mb: 2 }}>
-                <InputLabel>Sort By</InputLabel>
-                <Select
-                    value={sortBy}
-                    label="Sort By"
-                    onChange={(e) => setSortBy(e.target.value)}
-                >
-                    <MenuItem value="">None</MenuItem>
-                    <MenuItem value="date">Date</MenuItem>
-                    <MenuItem value="pant_hind">Deposit Price</MenuItem>
-                </Select>
-            </FormControl>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+                <FormControl sx={{ minWidth: 200 }}>
+                    <InputLabel>Sort By</InputLabel>
+                    <Select
+                        value={sortBy}
+                        label="Sort By"
+                        onChange={(e) => setSortBy(e.target.value)}
+                    >
+                        <MenuItem value="">None</MenuItem>
+                        <MenuItem value="date">Date</MenuItem>
+                        <MenuItem value="pant_hind">Deposit Price</MenuItem>
+                    </Select>
+                </FormControl>
+            </Box>
 
             <Paper>
                 {isMobile ? (
-                    // Мобильная версия — карточки
                     <Stack spacing={2} p={2}>
                         {sorted.map((c) => (
                             <Paper key={c.leping_id} sx={{ p: 3, mb: 3 }}>
@@ -253,7 +272,6 @@ export default function Leping() {
                         ))}
                     </Stack>
                 ) : (
-                    // Десктопная таблица
                     <Table>
                         <TableHead>
                             <TableRow>
@@ -329,6 +347,17 @@ export default function Leping() {
                 )}
             </Paper>
 
+            <Paper sx={{ mt: 2 }}>
+                <TablePagination
+                    component="div"
+                    count={total}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={[10]}
+                />
+            </Paper>
+
             <Button
                 variant="contained"
                 color="primary"
@@ -339,7 +368,6 @@ export default function Leping() {
                 Create Contract
             </Button>
 
-            {/* Confirm Dialog */}
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
                 <DialogTitle>Confirm Buyout</DialogTitle>
                 <DialogContent>
