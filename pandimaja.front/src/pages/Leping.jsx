@@ -32,7 +32,7 @@ export default function Leping() {
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const [contracts, setContracts] = useState([]);
-    const [sortBy, setSortBy] = useState("");
+    const [sortBy, setSortBy] = useState("date");
     const [searchParams, setSearchParams] = useState({
         search: "",
         leping_type: "",
@@ -52,7 +52,7 @@ export default function Leping() {
         }, 300);
 
         return () => clearTimeout(delayDebounce);
-    }, [searchParams, sortBy]);
+    }, [searchParams]);
 
     useEffect(() => {
         handleSearch();
@@ -119,9 +119,7 @@ export default function Leping() {
     };
 
     const sorted = [...contracts].sort((a, b) => {
-        if (sortBy === "date") return new Date(b.date) - new Date(a.date);
-        if (sortBy === "pant_hind") return b.pant_hind - a.pant_hind;
-        return 0;
+        return new Date(b.date) - new Date(a.date);
     });
 
     return (
@@ -255,7 +253,6 @@ export default function Leping() {
                                 <Typography>
                                     <b>Type:</b> {c.leping_type}
                                 </Typography>
-
                                 <Box
                                     mt={3}
                                     p={2}
