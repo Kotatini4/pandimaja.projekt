@@ -36,6 +36,8 @@ export default function Leping() {
     const [searchParams, setSearchParams] = useState({
         search: "",
         leping_type: "",
+        date_from: "",
+        date_to: "",
     });
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -75,6 +77,12 @@ export default function Leping() {
         }
         if (searchParams.leping_type) {
             params.append("leping_type", searchParams.leping_type);
+        }
+        if (searchParams.date_from) {
+            params.append("date_from", searchParams.date_from);
+        }
+        if (searchParams.date_to) {
+            params.append("date_to", searchParams.date_to);
         }
 
         params.append("page", page + 1);
@@ -142,6 +150,7 @@ export default function Leping() {
                         })
                     }
                 />
+
                 <FormControl sx={{ minWidth: 150 }}>
                     <InputLabel>Contract Type</InputLabel>
                     <Select
@@ -161,19 +170,45 @@ export default function Leping() {
                         <MenuItem value="väljaost">väljaost</MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl sx={{ minWidth: 150 }}>
-                    <InputLabel>Sort By</InputLabel>
-                    <Select
-                        value={sortBy}
-                        label="Sort By"
-                        onChange={(e) => setSortBy(e.target.value)}
-                    >
-                        <MenuItem value="">None</MenuItem>
-                        <MenuItem value="date">Date</MenuItem>
-                        <MenuItem value="pant_hind">Deposit Price</MenuItem>
-                    </Select>
-                </FormControl>
-                <Button variant="outlined" onClick={fetchContracts}>
+
+                <TextField
+                    label="Date From"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={searchParams.date_from}
+                    onChange={(e) =>
+                        setSearchParams({
+                            ...searchParams,
+                            date_from: e.target.value,
+                        })
+                    }
+                />
+                <TextField
+                    label="Date To"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={searchParams.date_to}
+                    onChange={(e) =>
+                        setSearchParams({
+                            ...searchParams,
+                            date_to: e.target.value,
+                        })
+                    }
+                />
+
+                <Button
+                    variant="outlined"
+                    onClick={() => {
+                        setSearchParams({
+                            search: "",
+                            leping_type: "",
+                            date_from: "",
+                            date_to: "",
+                        });
+                        setSortBy("");
+                        setPage(0);
+                    }}
+                >
                     Reset
                 </Button>
             </Box>
@@ -270,6 +305,8 @@ export default function Leping() {
                                 <TableCell>Date Valja Ostud</TableCell>
                                 <TableCell>Deposit</TableCell>
                                 <TableCell>Buyout</TableCell>
+                                <TableCell>Purchase Price</TableCell>
+                                <TableCell>Selling Price</TableCell>
                                 <TableCell>Type</TableCell>
                             </TableRow>
                         </TableHead>
@@ -301,6 +338,8 @@ export default function Leping() {
                                     <TableCell>
                                         {c.valja_ostud_hind || "—"}
                                     </TableCell>
+                                    <TableCell>{c.ostuhind || "—"}</TableCell>
+                                    <TableCell>{c.muugihind || "—"}</TableCell>
                                     <TableCell>
                                         {c.leping_type}
                                         {c.leping_type === "pant" &&

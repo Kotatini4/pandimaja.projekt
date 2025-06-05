@@ -138,19 +138,37 @@ exports.deleteLeping = async (req, res) => {
 
 // Search contracts
 exports.searchLepingud = async (req, res) => {
-    const { search, leping_type } = req.query;
+    const { search, leping_type, date_from, date_to } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
     try {
         const whereClause = {};
+
+        // Фильтр по типу контракта
         if (leping_type) {
             whereClause.leping_type = {
                 [Op.iLike]: `%${leping_type}%`,
             };
         }
 
+        // Фильтр по дате
+        if (date_from && date_to) {
+            whereClause.date = {
+                [Op.between]: [new Date(date_from), new Date(date_to)],
+            };
+        } else if (date_from) {
+            whereClause.date = {
+                [Op.gte]: new Date(date_from),
+            };
+        } else if (date_to) {
+            whereClause.date = {
+                [Op.lte]: new Date(date_to),
+            };
+        }
+
+        // Поиск по клиенту
         const klientWhere = search
             ? {
                   [Op.or]: [
