@@ -440,16 +440,19 @@ export default function Klient() {
                             ))}
                         </TableBody>
                     </Table>
-                    <TablePagination
-                        component="div"
-                        count={total}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        rowsPerPageOptions={[10]}
-                    />
                 </Paper>
             )}
+
+            <Paper sx={{ mt: 2 }}>
+                <TablePagination
+                    component="div"
+                    count={total}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={[10]}
+                />
+            </Paper>
         </Container>
     );
 }

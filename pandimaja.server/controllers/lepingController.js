@@ -24,11 +24,9 @@ exports.createLeping = async (req, res) => {
             return res.status(404).json({ message: "Client not found." });
 
         if (klient.status.toLowerCase() === "blocked") {
-            return res
-                .status(403)
-                .json({
-                    message: "Cannot create contract: client is blocked.",
-                });
+            return res.status(403).json({
+                message: "Cannot create contract: client is blocked.",
+            });
         }
 
         const newLeping = await models.leping.create({
@@ -53,8 +51,15 @@ exports.createLeping = async (req, res) => {
 
 // Get all contracts
 exports.getAllLepingud = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
     try {
-        const lepingud = await models.leping.findAll({
+        const { count, rows } = await models.leping.findAndCountAll({
+            limit,
+            offset,
+            distinct: true, // обязательно при использовании include
             include: [
                 {
                     model: models.klient,
@@ -72,15 +77,18 @@ exports.getAllLepingud = async (req, res) => {
                     attributes: ["nimi", "perekonnanimi"],
                 },
             ],
-            order: [["leping_id", "DESC"]], // ← новые договоры первыми
+            order: [["leping_id", "DESC"]],
         });
-        res.status(200).json(lepingud);
+
+        res.status(200).json({
+            data: rows,
+            total: count,
+        });
     } catch (err) {
-        console.error(err);
+        console.error("Error fetching contracts:", err);
         res.status(500).json({ message: "Error fetching contracts." });
     }
 };
-
 
 // Get contract by ID
 exports.getLepingById = async (req, res) => {
@@ -130,19 +138,24 @@ exports.deleteLeping = async (req, res) => {
 
 // Search contracts
 exports.searchLepingud = async (req, res) => {
-    const { klient_nimi, klient_perekonnanimi, klient_kood, leping_type } = req.query;
+    const { klient_nimi, klient_perekonnanimi, klient_kood, leping_type } =
+        req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
     try {
         const whereClause = {};
-
         if (leping_type) {
             whereClause.leping_type = {
                 [Op.iLike]: `%${leping_type}%`,
             };
         }
 
-        const lepingud = await models.leping.findAll({
+        const { count, rows } = await models.leping.findAndCountAll({
             where: whereClause,
+            limit,
+            offset,
             include: [
                 {
                     model: models.klient,
@@ -153,13 +166,15 @@ exports.searchLepingud = async (req, res) => {
                             nimi: { [Op.iLike]: `%${klient_nimi}%` },
                         }),
                         ...(klient_perekonnanimi && {
-                            perekonnanimi: { [Op.iLike]: `%${klient_perekonnanimi}%` },
+                            perekonnanimi: {
+                                [Op.iLike]: `%${klient_perekonnanimi}%`,
+                            },
                         }),
                         ...(klient_kood && {
                             kood: { [Op.like]: `%${klient_kood}%` },
                         }),
                     },
-                    required: true, // фильтрация только по совпавшим клиентам
+                    required: true,
                 },
                 {
                     model: models.toode,
@@ -174,7 +189,10 @@ exports.searchLepingud = async (req, res) => {
             ],
         });
 
-        res.status(200).json(lepingud);
+        res.status(200).json({
+            data: rows,
+            total: count,
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error searching contracts." });
@@ -190,7 +208,14 @@ exports.getPrintableLeping = async (req, res) => {
                 {
                     model: models.klient,
                     as: "klient",
-                    attributes: ["klient_id", "nimi", "perekonnanimi", "kood", "tel", "aadres"],
+                    attributes: [
+                        "klient_id",
+                        "nimi",
+                        "perekonnanimi",
+                        "kood",
+                        "tel",
+                        "aadres",
+                    ],
                 },
                 {
                     model: models.toode,
