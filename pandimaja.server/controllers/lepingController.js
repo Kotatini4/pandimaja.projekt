@@ -138,8 +138,7 @@ exports.deleteLeping = async (req, res) => {
 
 // Search contracts
 exports.searchLepingud = async (req, res) => {
-    const { klient_nimi, klient_perekonnanimi, klient_kood, leping_type } =
-        req.query;
+    const { search, leping_type } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -152,6 +151,16 @@ exports.searchLepingud = async (req, res) => {
             };
         }
 
+        const klientWhere = search
+            ? {
+                  [Op.or]: [
+                      { nimi: { [Op.iLike]: `%${search}%` } },
+                      { perekonnanimi: { [Op.iLike]: `%${search}%` } },
+                      { kood: { [Op.like]: `%${search}%` } },
+                  ],
+              }
+            : undefined;
+
         const { count, rows } = await models.leping.findAndCountAll({
             where: whereClause,
             limit,
@@ -161,19 +170,7 @@ exports.searchLepingud = async (req, res) => {
                     model: models.klient,
                     as: "klient",
                     attributes: ["nimi", "perekonnanimi", "kood"],
-                    where: {
-                        ...(klient_nimi && {
-                            nimi: { [Op.iLike]: `%${klient_nimi}%` },
-                        }),
-                        ...(klient_perekonnanimi && {
-                            perekonnanimi: {
-                                [Op.iLike]: `%${klient_perekonnanimi}%`,
-                            },
-                        }),
-                        ...(klient_kood && {
-                            kood: { [Op.like]: `%${klient_kood}%` },
-                        }),
-                    },
+                    where: klientWhere,
                     required: true,
                 },
                 {

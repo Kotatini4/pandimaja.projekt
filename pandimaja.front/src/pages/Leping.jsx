@@ -34,9 +34,7 @@ export default function Leping() {
     const [contracts, setContracts] = useState([]);
     const [sortBy, setSortBy] = useState("");
     const [searchParams, setSearchParams] = useState({
-        klient_nimi: "",
-        klient_perekonnanimi: "",
-        klient_kood: "",
+        search: "",
         leping_type: "",
     });
     const [page, setPage] = useState(0);
@@ -44,6 +42,15 @@ export default function Leping() {
     const [total, setTotal] = useState(0);
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedToodeId, setSelectedToodeId] = useState(null);
+
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            setPage(0);
+            handleSearch();
+        }, 300);
+
+        return () => clearTimeout(delayDebounce);
+    }, [searchParams, sortBy]);
 
     useEffect(() => {
         handleSearch();
@@ -62,9 +69,14 @@ export default function Leping() {
 
     const handleSearch = () => {
         const params = new URLSearchParams();
-        Object.entries(searchParams).forEach(([key, value]) => {
-            if (value.trim()) params.append(key, value.trim());
-        });
+
+        if (searchParams.search.trim()) {
+            params.append("search", searchParams.search.trim());
+        }
+        if (searchParams.leping_type) {
+            params.append("leping_type", searchParams.leping_type);
+        }
+
         params.append("page", page + 1);
         params.append("limit", rowsPerPage);
 
@@ -121,32 +133,12 @@ export default function Leping() {
                 }}
             >
                 <TextField
-                    label="Client First Name"
-                    value={searchParams.klient_nimi}
+                    label="Search by name or ID code"
+                    value={searchParams.search}
                     onChange={(e) =>
                         setSearchParams({
                             ...searchParams,
-                            klient_nimi: e.target.value,
-                        })
-                    }
-                />
-                <TextField
-                    label="Client Last Name"
-                    value={searchParams.klient_perekonnanimi}
-                    onChange={(e) =>
-                        setSearchParams({
-                            ...searchParams,
-                            klient_perekonnanimi: e.target.value,
-                        })
-                    }
-                />
-                <TextField
-                    label="ID Contract"
-                    value={searchParams.klient_kood}
-                    onChange={(e) =>
-                        setSearchParams({
-                            ...searchParams,
-                            klient_kood: e.target.value,
+                            search: e.target.value,
                         })
                     }
                 />
@@ -169,16 +161,7 @@ export default function Leping() {
                         <MenuItem value="väljaost">väljaost</MenuItem>
                     </Select>
                 </FormControl>
-                <Button variant="contained" onClick={handleSearch}>
-                    Search
-                </Button>
-                <Button variant="outlined" onClick={fetchContracts}>
-                    Reset
-                </Button>
-            </Box>
-
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-                <FormControl sx={{ minWidth: 200 }}>
+                <FormControl sx={{ minWidth: 150 }}>
                     <InputLabel>Sort By</InputLabel>
                     <Select
                         value={sortBy}
@@ -190,6 +173,9 @@ export default function Leping() {
                         <MenuItem value="pant_hind">Deposit Price</MenuItem>
                     </Select>
                 </FormControl>
+                <Button variant="outlined" onClick={fetchContracts}>
+                    Reset
+                </Button>
             </Box>
 
             <Paper>
