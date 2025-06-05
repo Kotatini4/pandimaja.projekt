@@ -99,40 +99,36 @@ exports.getAllTooded = async (req, res) => {
 exports.searchTooded = async (req, res) => {
     const { nimetus, kirjeldus, status_id } = req.query;
 
+    const where = {};
+
+    if (nimetus) {
+        where.nimetus = { [Op.iLike]: `%${nimetus}%` };
+    }
+
+    if (kirjeldus) {
+        where.kirjeldus = { [Op.iLike]: `%${kirjeldus}%` };
+    }
+
+    if (status_id) {
+        where.status_id = status_id;
+    }
+
     try {
-        const filters = [];
-
-        if (nimetus) {
-            filters.push({ nimetus: { [Op.iLike]: `%${nimetus}%` } });
-        }
-
-        if (kirjeldus) {
-            filters.push({ kirjeldus: { [Op.iLike]: `%${kirjeldus}%` } });
-        }
-
-        if (status_id) {
-            filters.push({ status_id });
-        }
-
-        if (filters.length === 0) {
-            return res.status(400).json({
-                message:
-                    "Please provide at least one search parameter (nimetus, kirjeldus, status_id).",
-            });
-        }
-
-        const tooded = await models.toode.findAll({
-            where: {
-                [Op.or]: filters,
-            },
+        const results = await models.toode.findAll({
+            where,
+            include: [
+                {
+                    model: models.status_toode,
+                    as: "status",
+                    attributes: ["nimetus"],
+                },
+            ],
         });
 
-        res.status(200).json(tooded);
+        res.status(200).json(results);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Server error while searching for products.",
-        });
+        console.error("Error searching products:", error);
+        res.status(500).json({ message: "Server error" });
     }
 };
 

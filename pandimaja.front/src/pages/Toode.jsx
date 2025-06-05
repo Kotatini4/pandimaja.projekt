@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import api from "../services/api";
 import { useTheme } from "@mui/material/styles";
+import { FormControl, InputLabel } from "@mui/material";
 
 export default function Toode() {
     const [products, setProducts] = useState([]);
@@ -145,32 +146,41 @@ export default function Toode() {
                 Products
             </Typography>
 
-            <Stack direction="row" rowGap={2} sx={{ mb: 4 }} flexWrap="wrap">
+            <Stack
+                direction={isMobile ? "column" : "row"}
+                spacing={2}
+                sx={{ mb: 4 }}
+                alignItems="flex-start"
+            >
                 <TextField
                     label="Name"
                     value={nameFilter}
                     onChange={(e) => setNameFilter(e.target.value)}
+                    size="small"
                     fullWidth
                 />
                 <TextField
                     label="Description"
                     value={descFilter}
                     onChange={(e) => setDescFilter(e.target.value)}
+                    size="small"
                     fullWidth
                 />
-                <Select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    displayEmpty
-                    fullWidth
-                >
-                    <MenuItem value="">All statuses</MenuItem>
-                    {statuses.map((s) => (
-                        <MenuItem key={s.status_id} value={s.status_id}>
-                            {s.nimetus}
-                        </MenuItem>
-                    ))}
-                </Select>
+                <FormControl size="small" fullWidth>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        label="Status"
+                    >
+                        <MenuItem value="">All statuses</MenuItem>
+                        {statuses.map((s) => (
+                            <MenuItem key={s.status_id} value={s.status_id}>
+                                {s.nimetus}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
             </Stack>
 
             {isMobile ? (
