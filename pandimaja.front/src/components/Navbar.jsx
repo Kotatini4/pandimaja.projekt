@@ -48,386 +48,405 @@ export default function Navbar() {
     const handleKlientMenuClose = () => setKlientMenuAnchor(null);
 
     return (
-        <AppBar
-            position="static"
-            sx={{
-                background: "linear-gradient(90deg, #2c225e 0%, #2c5c82 100%)",
-                color: "white",
-                boxShadow: 2,
-            }}
-        >
-            <Container>
-                <Toolbar>
-                    {isMobile ? (
-                        <>
-                            <IconButton
-                                color="inherit"
-                                onClick={handleMenuOpen}
-                            >
-                                <MenuIcon />
-                            </IconButton>
-                            <Menu
-                                anchorEl={anchorEl}
-                                open={open}
-                                onClose={handleMenuClose}
-                                anchorOrigin={{
-                                    vertical: "bottom",
-                                    horizontal: "right",
-                                }}
-                                transformOrigin={{
-                                    vertical: "top",
-                                    horizontal: "right",
-                                }}
-                            >
-                                <MenuItem
-                                    component={Link}
-                                    to="/"
-                                    onClick={handleMenuClose}
+        <>
+            <AppBar
+                position="fixed"
+                sx={{
+                    background:
+                        "linear-gradient(90deg, #2c225e 0%, #2c5c82 100%)",
+                    color: "white",
+                    boxShadow: 2,
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                }}
+            >
+                <Container>
+                    <Toolbar>
+                        {isMobile ? (
+                            <>
+                                <IconButton
+                                    color="inherit"
+                                    onClick={handleMenuOpen}
                                 >
-                                    Home
-                                </MenuItem>
-                                <MenuItem
-                                    component={Link}
-                                    to="/contacts"
-                                    onClick={handleMenuClose}
+                                    <MenuIcon />
+                                </IconButton>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={open}
+                                    onClose={handleMenuClose}
+                                    anchorOrigin={{
+                                        vertical: "bottom",
+                                        horizontal: "right",
+                                    }}
+                                    transformOrigin={{
+                                        vertical: "top",
+                                        horizontal: "right",
+                                    }}
                                 >
-                                    Contacts
-                                </MenuItem>
-                                {(user?.roleId === 1 || user?.roleId === 2) && (
-                                    <>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/klient"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Client List
-                                        </MenuItem>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/klient/create"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Add Client
-                                        </MenuItem>
-                                    </>
-                                )}
-                                {(user?.roleId === 1 || user?.roleId === 2) && (
-                                    <>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/toode"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Product List
-                                        </MenuItem>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/toode/create"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Add Product
-                                        </MenuItem>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/leping"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Contracts
-                                        </MenuItem>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/leping/create"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Add Contract
-                                        </MenuItem>
-                                    </>
-                                )}
-                                {user?.roleId === 1 && (
-                                    <>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/tootaja"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Employee List
-                                        </MenuItem>
-                                        <MenuItem
-                                            component={Link}
-                                            to="/tootaja/create"
-                                            onClick={handleMenuClose}
-                                        >
-                                            Add Employee
-                                        </MenuItem>
-                                    </>
-                                )}
-                                {user ? (
-                                    <>
-                                        <MenuItem disabled>
-                                            {user.name}
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => {
-                                                handleLogout();
-                                                handleMenuClose();
-                                            }}
-                                        >
-                                            Logout
-                                        </MenuItem>
-                                    </>
-                                ) : (
                                     <MenuItem
                                         component={Link}
-                                        to="/login"
+                                        to="/"
                                         onClick={handleMenuClose}
                                     >
-                                        Login
-                                    </MenuItem>
-                                )}
-                            </Menu>
-                        </>
-                    ) : (
-                        <>
-                            <Box sx={{ flexGrow: 1 }}>
-                                <Stack direction="row" spacing={2}>
-                                    <Button
-                                        color="inherit"
-                                        component={Link}
-                                        to="/"
-                                    >
                                         Home
-                                    </Button>
-                                    <Button
-                                        color="inherit"
+                                    </MenuItem>
+                                    <MenuItem
                                         component={Link}
                                         to="/contacts"
+                                        onClick={handleMenuClose}
                                     >
                                         Contacts
-                                    </Button>
+                                    </MenuItem>
                                     {(user?.roleId === 1 ||
                                         user?.roleId === 2) && (
-                                        <Box>
-                                            <Button
-                                                color="inherit"
-                                                onMouseEnter={
-                                                    handleKlientMenuOpen
-                                                }
+                                        <>
+                                            <MenuItem
+                                                component={Link}
+                                                to="/klient"
+                                                onClick={handleMenuClose}
                                             >
-                                                Clients
-                                            </Button>
-                                            <Menu
-                                                anchorEl={klientMenuAnchor}
-                                                open={Boolean(klientMenuAnchor)}
-                                                onClose={handleKlientMenuClose}
-                                                MenuListProps={{
-                                                    onMouseLeave:
-                                                        handleKlientMenuClose,
-                                                }}
+                                                Client List
+                                            </MenuItem>
+                                            <MenuItem
+                                                component={Link}
+                                                to="/klient/create"
+                                                onClick={handleMenuClose}
                                             >
-                                                <MenuItem
-                                                    component={Link}
-                                                    to="/klient"
-                                                    onClick={
-                                                        handleKlientMenuClose
-                                                    }
-                                                >
-                                                    List
-                                                </MenuItem>
-                                                <MenuItem
-                                                    component={Link}
-                                                    to="/klient/create"
-                                                    onClick={
-                                                        handleKlientMenuClose
-                                                    }
-                                                >
-                                                    Add
-                                                </MenuItem>
-                                            </Menu>
-                                        </Box>
+                                                Add Client
+                                            </MenuItem>
+                                        </>
                                     )}
-
                                     {(user?.roleId === 1 ||
                                         user?.roleId === 2) && (
-                                        <Box>
-                                            <Button
-                                                color="inherit"
-                                                onMouseEnter={(e) =>
-                                                    setProductMenuAnchor(
-                                                        e.currentTarget
-                                                    )
-                                                }
+                                        <>
+                                            <MenuItem
+                                                component={Link}
+                                                to="/toode"
+                                                onClick={handleMenuClose}
                                             >
-                                                Products
-                                            </Button>
-                                            <Menu
-                                                anchorEl={productMenuAnchor}
-                                                open={Boolean(
-                                                    productMenuAnchor
-                                                )}
-                                                onClose={() =>
-                                                    setProductMenuAnchor(null)
-                                                }
-                                                MenuListProps={{
-                                                    onMouseLeave: () =>
-                                                        setProductMenuAnchor(
-                                                            null
-                                                        ),
-                                                }}
+                                                Product List
+                                            </MenuItem>
+                                            <MenuItem
+                                                component={Link}
+                                                to="/toode/create"
+                                                onClick={handleMenuClose}
                                             >
-                                                <MenuItem
-                                                    component={Link}
-                                                    to="/toode"
-                                                    onClick={() =>
-                                                        setProductMenuAnchor(
-                                                            null
-                                                        )
-                                                    }
-                                                >
-                                                    List
-                                                </MenuItem>
-                                                <MenuItem
-                                                    component={Link}
-                                                    to="/toode/create"
-                                                    onClick={() =>
-                                                        setProductMenuAnchor(
-                                                            null
-                                                        )
-                                                    }
-                                                >
-                                                    Add
-                                                </MenuItem>
-                                            </Menu>
-                                        </Box>
-                                    )}
-
-                                    {(user?.roleId === 1 ||
-                                        user?.roleId === 2) && (
-                                        <Box>
-                                            <Button
-                                                color="inherit"
-                                                onMouseEnter={(e) =>
-                                                    setLepingMenuAnchor(
-                                                        e.currentTarget
-                                                    )
-                                                }
+                                                Add Product
+                                            </MenuItem>
+                                            <MenuItem
+                                                component={Link}
+                                                to="/leping"
+                                                onClick={handleMenuClose}
                                             >
                                                 Contracts
-                                            </Button>
-                                            <Menu
-                                                anchorEl={lepingMenuAnchor}
-                                                open={Boolean(lepingMenuAnchor)}
-                                                onClose={() =>
-                                                    setLepingMenuAnchor(null)
-                                                }
-                                                MenuListProps={{
-                                                    onMouseLeave: () =>
-                                                        setLepingMenuAnchor(
-                                                            null
-                                                        ),
-                                                }}
+                                            </MenuItem>
+                                            <MenuItem
+                                                component={Link}
+                                                to="/leping/create"
+                                                onClick={handleMenuClose}
                                             >
-                                                <MenuItem
-                                                    component={Link}
-                                                    to="/leping"
-                                                    onClick={() =>
-                                                        setLepingMenuAnchor(
-                                                            null
-                                                        )
-                                                    }
-                                                >
-                                                    List
-                                                </MenuItem>
-                                                <MenuItem
-                                                    component={Link}
-                                                    to="/leping/create"
-                                                    onClick={() =>
-                                                        setLepingMenuAnchor(
-                                                            null
-                                                        )
-                                                    }
-                                                >
-                                                    Add
-                                                </MenuItem>
-                                            </Menu>
-                                        </Box>
+                                                Add Contract
+                                            </MenuItem>
+                                        </>
                                     )}
-
                                     {user?.roleId === 1 && (
-                                        <Box>
-                                            <Button
-                                                color="inherit"
-                                                onMouseEnter={
-                                                    handleTootajaMenuOpen
-                                                }
+                                        <>
+                                            <MenuItem
+                                                component={Link}
+                                                to="/tootaja"
+                                                onClick={handleMenuClose}
                                             >
-                                                Employees
-                                            </Button>
-                                            <Menu
-                                                anchorEl={tootajaMenuAnchor}
-                                                open={Boolean(
-                                                    tootajaMenuAnchor
-                                                )}
-                                                onClose={handleTootajaMenuClose}
-                                                MenuListProps={{
-                                                    onMouseLeave:
-                                                        handleTootajaMenuClose,
+                                                Employee List
+                                            </MenuItem>
+                                            <MenuItem
+                                                component={Link}
+                                                to="/tootaja/create"
+                                                onClick={handleMenuClose}
+                                            >
+                                                Add Employee
+                                            </MenuItem>
+                                        </>
+                                    )}
+                                    {user ? (
+                                        <>
+                                            <MenuItem disabled>
+                                                {user.name}
+                                            </MenuItem>
+                                            <MenuItem
+                                                onClick={() => {
+                                                    handleLogout();
+                                                    handleMenuClose();
                                                 }}
                                             >
-                                                <MenuItem
-                                                    component={Link}
-                                                    to="/tootaja"
-                                                    onClick={
-                                                        handleTootajaMenuClose
-                                                    }
-                                                >
-                                                    List
-                                                </MenuItem>
-                                                <MenuItem
-                                                    component={Link}
-                                                    to="/tootaja/create"
-                                                    onClick={
-                                                        handleTootajaMenuClose
-                                                    }
-                                                >
-                                                    Add
-                                                </MenuItem>
-                                            </Menu>
-                                        </Box>
+                                                Logout
+                                            </MenuItem>
+                                        </>
+                                    ) : (
+                                        <MenuItem
+                                            component={Link}
+                                            to="/login"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Login
+                                        </MenuItem>
                                     )}
-                                </Stack>
-                            </Box>
-
-                            <Stack
-                                direction="row"
-                                spacing={2}
-                                alignItems="center"
-                            >
-                                {user ? (
-                                    <>
-                                        <Typography sx={{ mr: 1 }}>
-                                            {user.name}
-                                        </Typography>
+                                </Menu>
+                            </>
+                        ) : (
+                            <>
+                                <Box sx={{ flexGrow: 1 }}>
+                                    <Stack direction="row" spacing={2}>
                                         <Button
                                             color="inherit"
-                                            onClick={handleLogout}
+                                            component={Link}
+                                            to="/"
                                         >
-                                            Logout
+                                            Home
                                         </Button>
-                                    </>
-                                ) : (
-                                    <Button
-                                        color="inherit"
-                                        component={Link}
-                                        to="/login"
-                                    >
-                                        Login
-                                    </Button>
-                                )}
-                            </Stack>
-                        </>
-                    )}
-                </Toolbar>
-            </Container>
-        </AppBar>
+                                        <Button
+                                            color="inherit"
+                                            component={Link}
+                                            to="/contacts"
+                                        >
+                                            Contacts
+                                        </Button>
+                                        {(user?.roleId === 1 ||
+                                            user?.roleId === 2) && (
+                                            <Box>
+                                                <Button
+                                                    color="inherit"
+                                                    onMouseEnter={
+                                                        handleKlientMenuOpen
+                                                    }
+                                                >
+                                                    Clients
+                                                </Button>
+                                                <Menu
+                                                    anchorEl={klientMenuAnchor}
+                                                    open={Boolean(
+                                                        klientMenuAnchor
+                                                    )}
+                                                    onClose={
+                                                        handleKlientMenuClose
+                                                    }
+                                                    MenuListProps={{
+                                                        onMouseLeave:
+                                                            handleKlientMenuClose,
+                                                    }}
+                                                >
+                                                    <MenuItem
+                                                        component={Link}
+                                                        to="/klient"
+                                                        onClick={
+                                                            handleKlientMenuClose
+                                                        }
+                                                    >
+                                                        List
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        component={Link}
+                                                        to="/klient/create"
+                                                        onClick={
+                                                            handleKlientMenuClose
+                                                        }
+                                                    >
+                                                        Add
+                                                    </MenuItem>
+                                                </Menu>
+                                            </Box>
+                                        )}
+
+                                        {(user?.roleId === 1 ||
+                                            user?.roleId === 2) && (
+                                            <Box>
+                                                <Button
+                                                    color="inherit"
+                                                    onMouseEnter={(e) =>
+                                                        setProductMenuAnchor(
+                                                            e.currentTarget
+                                                        )
+                                                    }
+                                                >
+                                                    Products
+                                                </Button>
+                                                <Menu
+                                                    anchorEl={productMenuAnchor}
+                                                    open={Boolean(
+                                                        productMenuAnchor
+                                                    )}
+                                                    onClose={() =>
+                                                        setProductMenuAnchor(
+                                                            null
+                                                        )
+                                                    }
+                                                    MenuListProps={{
+                                                        onMouseLeave: () =>
+                                                            setProductMenuAnchor(
+                                                                null
+                                                            ),
+                                                    }}
+                                                >
+                                                    <MenuItem
+                                                        component={Link}
+                                                        to="/toode"
+                                                        onClick={() =>
+                                                            setProductMenuAnchor(
+                                                                null
+                                                            )
+                                                        }
+                                                    >
+                                                        List
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        component={Link}
+                                                        to="/toode/create"
+                                                        onClick={() =>
+                                                            setProductMenuAnchor(
+                                                                null
+                                                            )
+                                                        }
+                                                    >
+                                                        Add
+                                                    </MenuItem>
+                                                </Menu>
+                                            </Box>
+                                        )}
+
+                                        {(user?.roleId === 1 ||
+                                            user?.roleId === 2) && (
+                                            <Box>
+                                                <Button
+                                                    color="inherit"
+                                                    onMouseEnter={(e) =>
+                                                        setLepingMenuAnchor(
+                                                            e.currentTarget
+                                                        )
+                                                    }
+                                                >
+                                                    Contracts
+                                                </Button>
+                                                <Menu
+                                                    anchorEl={lepingMenuAnchor}
+                                                    open={Boolean(
+                                                        lepingMenuAnchor
+                                                    )}
+                                                    onClose={() =>
+                                                        setLepingMenuAnchor(
+                                                            null
+                                                        )
+                                                    }
+                                                    MenuListProps={{
+                                                        onMouseLeave: () =>
+                                                            setLepingMenuAnchor(
+                                                                null
+                                                            ),
+                                                    }}
+                                                >
+                                                    <MenuItem
+                                                        component={Link}
+                                                        to="/leping"
+                                                        onClick={() =>
+                                                            setLepingMenuAnchor(
+                                                                null
+                                                            )
+                                                        }
+                                                    >
+                                                        List
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        component={Link}
+                                                        to="/leping/create"
+                                                        onClick={() =>
+                                                            setLepingMenuAnchor(
+                                                                null
+                                                            )
+                                                        }
+                                                    >
+                                                        Add
+                                                    </MenuItem>
+                                                </Menu>
+                                            </Box>
+                                        )}
+
+                                        {user?.roleId === 1 && (
+                                            <Box>
+                                                <Button
+                                                    color="inherit"
+                                                    onMouseEnter={
+                                                        handleTootajaMenuOpen
+                                                    }
+                                                >
+                                                    Employees
+                                                </Button>
+                                                <Menu
+                                                    anchorEl={tootajaMenuAnchor}
+                                                    open={Boolean(
+                                                        tootajaMenuAnchor
+                                                    )}
+                                                    onClose={
+                                                        handleTootajaMenuClose
+                                                    }
+                                                    MenuListProps={{
+                                                        onMouseLeave:
+                                                            handleTootajaMenuClose,
+                                                    }}
+                                                >
+                                                    <MenuItem
+                                                        component={Link}
+                                                        to="/tootaja"
+                                                        onClick={
+                                                            handleTootajaMenuClose
+                                                        }
+                                                    >
+                                                        List
+                                                    </MenuItem>
+                                                    <MenuItem
+                                                        component={Link}
+                                                        to="/tootaja/create"
+                                                        onClick={
+                                                            handleTootajaMenuClose
+                                                        }
+                                                    >
+                                                        Add
+                                                    </MenuItem>
+                                                </Menu>
+                                            </Box>
+                                        )}
+                                    </Stack>
+                                </Box>
+
+                                <Stack
+                                    direction="row"
+                                    spacing={2}
+                                    alignItems="center"
+                                >
+                                    {user ? (
+                                        <>
+                                            <Typography sx={{ mr: 1 }}>
+                                                {user.name}
+                                            </Typography>
+                                            <Button
+                                                color="inherit"
+                                                onClick={handleLogout}
+                                            >
+                                                Logout
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <Button
+                                            color="inherit"
+                                            component={Link}
+                                            to="/login"
+                                        >
+                                            Login
+                                        </Button>
+                                    )}
+                                </Stack>
+                            </>
+                        )}
+                    </Toolbar>
+                </Container>
+            </AppBar>
+            <Box sx={{ height: { xs: 56, sm: 64 } }} />
+        </>
     );
 }
