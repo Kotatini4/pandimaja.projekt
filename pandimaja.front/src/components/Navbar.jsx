@@ -134,6 +134,13 @@ export default function Navbar() {
                                         >
                                             Contracts
                                         </MenuItem>
+                                        <MenuItem
+                                            component={Link}
+                                            to="/leping/create"
+                                            onClick={handleMenuClose}
+                                        >
+                                            Add Contract
+                                        </MenuItem>
                                     </>
                                 )}
                                 {user?.roleId === 1 && (

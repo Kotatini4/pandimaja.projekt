@@ -34,17 +34,49 @@ export default function TootajaCreate() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.nimi || !form.perekonnanimi || !form.kood || !form.pass) {
+        const { nimi, perekonnanimi, kood, pass } = form;
+
+        if (!nimi || !perekonnanimi || !kood || !pass) {
             alert("Name, surname, ID and password are required.");
             return;
         }
 
-        if (!/^[0-9]{11}$/.test(form.kood)) {
-            alert("Kood must be exactly 11 digits.");
+        if (!/^[1-6][0-9]{10}$/.test(kood)) {
+            alert("Kood must be 11 digits and start with 1–6.");
             return;
         }
 
-        if (form.pass.length < 6) {
+        // Проверка даты рождения из kood
+        const genderCode = parseInt(kood[0]);
+        const yearPart = kood.substring(1, 3);
+        const month = parseInt(kood.substring(3, 5));
+        const day = parseInt(kood.substring(5, 7));
+
+        let year;
+        if (genderCode === 1 || genderCode === 2)
+            year = 1800 + parseInt(yearPart);
+        else if (genderCode === 3 || genderCode === 4)
+            year = 1900 + parseInt(yearPart);
+        else if (genderCode === 5 || genderCode === 6)
+            year = 2000 + parseInt(yearPart);
+        else {
+            alert("Invalid gender/century code in kood.");
+            return;
+        }
+
+        const dateValid = !isNaN(
+            Date.parse(
+                `${year}-${String(month).padStart(2, "0")}-${String(
+                    day
+                ).padStart(2, "0")}`
+            )
+        );
+        if (!dateValid) {
+            alert("Invalid birthdate in kood.");
+            return;
+        }
+
+        if (pass.length < 6) {
             alert("Password must be at least 6 characters.");
             return;
         }
