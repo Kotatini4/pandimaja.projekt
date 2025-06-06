@@ -502,16 +502,16 @@ export default function Toode() {
                             ))}
                         </TableBody>
                     </Table>
-                    <TablePagination
-                        component="div"
-                        count={total}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        rowsPerPageOptions={[10]}
-                    />
                 </Paper>
             )}
+            <TablePagination
+                component="div"
+                count={total}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                rowsPerPageOptions={[10]}
+            />
         </Container>
     );
 }
